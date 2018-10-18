@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Cake.AzureStorage</id>
+    <version>0.14.0</version>
+    <title>Cake.AzureStorage</title>
+    <authors>Radio Systems Corporation</authors>
+    <owners>Radio Systems Corporation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/RadioSystems/Cake.AzureStorage/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/RadioSystems/Cake.AzureStorage</projectUrl>
+    <iconUrl>https://cdn.rawgit.com/cake-contrib/graphics/a5cf0f881c390650144b2243ae551d5b9f836196/png/cake-contrib-medium.png</iconUrl>
+    <description>Cake Addin for working with Azure Storage.</description>
+    <copyright>Copyright (c) Radio Systems Corporation 2017 - Present</copyright>
+    <tags>Azure Storage Cake</tags>
+  </metadata>
+</package>
