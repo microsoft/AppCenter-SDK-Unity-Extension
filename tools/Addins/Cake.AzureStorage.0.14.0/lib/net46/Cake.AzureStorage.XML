@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Cake.AzureStorage</name>
+    </assembly>
+    <members>
+        <member name="T:Cake.AzureStorage.AzureStorage">
+            <summary>
+            Azure Storage Client for Cake.
+            </summary>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorage.UploadFileToBlob(Cake.AzureStorage.AzureStorageSettings,Cake.Core.IO.FilePath)">
+            <summary>
+            Uploads file to an Azure blob storage account.
+            </summary>
+            <param name="settings">Azure Storage Settings</param>
+            <param name="fileToUpload">File to upload to blob storage.</param>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorage.DeleteBlob(Cake.AzureStorage.AzureStorageSettings)">
+            <summary>
+            Deletes an Azure blob from Azure Storage
+            </summary>
+            <param name="settings">Azure Storage Settings</param>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorage.DeleteBlobsByPrefix(Cake.AzureStorage.AzureStorageSettings)">
+            <summary>
+            Deletes an Azure blob from Azure Storage using a prefix to determine which blobs to delete, prefix = BlobName
+            </summary>
+            <param name="settings">Azure Storage Settings</param>
+        </member>
+        <member name="T:Cake.AzureStorage.AzureStorageAlias">
+            <summary>
+            Contains functionality for workign with Azure Storage
+            </summary>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorageAlias.UploadFileToBlob(Cake.Core.ICakeContext,Cake.AzureStorage.AzureStorageSettings,Cake.Core.IO.FilePath)">
+            <summary>
+            Uploads a file to Azure Blob Storage.
+            </summary>
+            <example>
+            <code>
+            Task("PackageNoSettings")
+             .Does(() => {
+              var settings = new AzureStorageSettings();
+              settings.AccountName = "AccountName";
+              settings.Key = "API KEY";
+              settings.ContainerName = "ContainerName";
+              settings.BlobName = "BlobName";
+              UploadFileToBlob(settings, GetFile("./path/to/file/to/upload"));
+            });
+            </code>
+            </example>
+            <param name="context">The context.</param>
+            <param name="settings">Azure Storage Settings.</param>
+            <param name="fileToUpload">File to upload to Azure storage.</param>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorageAlias.DeleteBlob(Cake.Core.ICakeContext,Cake.AzureStorage.AzureStorageSettings)">
+            <summary>
+            Deletes an Azure Storage blob
+            </summary>
+            <example>
+            <code>
+            Task("PackageAfterDelete")
+             .Does(() => {
+              var settings = new AzureStorageSettings();
+              settings.AccountName = "AccountName";
+              settings.Key = "API KEY";
+              settings.ContainerName = "ContainerName";
+              settings.BlobName = "NameToDelete";
+              DeleteBlob(settings);
+              
+              settings.BlobName = "NameToUploadAs";
+               var filePath = new FilePath("./location/of/file/to/upload");
+              UploadFileToBlob(settings, filePath));
+            });
+            </code>
+            </example>
+            <param name="context">The context.</param>
+            <param name="settings">Azure Storage Settings.</param>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorageAlias.DeleteBlobsByPrefix(Cake.Core.ICakeContext,Cake.AzureStorage.AzureStorageSettings)">
+            <summary>
+            Deletes an Azure Storage blobs by prefix.
+            </summary>
+            <example>
+            <code>
+            Task("PackageAfterDelete")
+             .Does(() => {
+              var settings = new AzureStorageSettings();
+              settings.AccountName = "AccountName";
+              settings.Key = "API KEY";
+              settings.ContainerName = "ContainerName";
+              settings.BlobName = "PrefixToSearchBy";
+            
+              var deletedLog = DeleteBlobsByPrefix(settings);
+              foreach (var line in deletedLog){
+                Information(line);
+              }
+              
+              settings.BlobName = "NameToUploadAs";
+              var filePath = new FilePath("./location/of/file/to/upload");
+              UploadFileToBlob(settings, filePath));
+            });
+            </code>
+            </example>
+            <param name="context">The context.</param>
+            <param name="settings">Azure Storage Settings.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Cake.AzureStorage.AzureStorageSettings">
+            <summary>
+                Initializes a new instance of the <see cref="T:Cake.AzureStorage.AzureStorageSettings"/> class.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.UseLocal">
+            <summary>
+            Gets or sets the Use Local Emulator option.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.AccountName">
+            <summary>
+            Gets or sets the Azure account name.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.Key">
+            <summary>
+            Gets or sets the Azure API Key.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.ContainerName">
+            <summary>
+            Gets or sets the Azure container name.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.BlobName">
+            <summary>
+            Gets or sets the Azure blob name.
+            </summary>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.UseHttps">
+            <summary>
+            Gets or sets wethere to use HTTPS or not, 
+            </summary>
+            <value>
+                <c>true</c> to use HTTPS, default; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Cake.AzureStorage.AzureStorageSettings.ContentType">
+            <summary>
+            Gets or sets the content type property of the blob, 
+            </summary>
+            <value>
+                set to content type if desired, examples: video/mp4, image/jpeg, application/json
+            </value>
+        </member>
+        <member name="M:Cake.AzureStorage.AzureStorageSettings.#ctor">
+            <summary>
+            The constructor.
+            </summary>
+        </member>
+    </members>
+</doc>
