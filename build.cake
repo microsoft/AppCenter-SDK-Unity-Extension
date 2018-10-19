@@ -113,27 +113,6 @@ Task("CreatePackages").Does(()=>
     }
 });
 
-Task("PublishPackagesToStorage").Does(()=>
-{
-    // The environment variables below must be set for this task to succeed
-    var apiKey = Argument("AzureStorageAccessKey", EnvironmentVariable("AZURE_STORAGE_ACCESS_KEY"));
-    var accountName = EnvironmentVariable("AZURE_STORAGE_ACCOUNT");
-    var corePackageVersion = XmlPeek(File("UnityPackageSpecs/AppCenter.unitypackagespec"), "package/@version");
-    var zippedPackages = "AppCenter-SDK-Unity-" + corePackageVersion + ".zip";
-    Information("Publishing packages to blob " + zippedPackages);
-    var files = GetFiles("output/*.unitypackage");
-    Zip("./", zippedPackages, files);
-    AzureStorage.UploadFileToBlob(new AzureStorageSettings
-    {
-        AccountName = accountName,
-        ContainerName = "sdk",
-        BlobName = zippedPackages,
-        Key = apiKey,
-        UseHttps = true
-    }, zippedPackages);
-    DeleteFiles(zippedPackages);
-}).OnError(HandleError);
-
 Task("RegisterUnity").Does(()=>
 {
     var serialNumber = Argument<string>("UnitySerialNumber");
