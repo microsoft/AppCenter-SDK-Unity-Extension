@@ -109,7 +109,7 @@ Task("CreatePackages").Does(()=>
     foreach (var spec in specFiles)
     {
         var package = new UnityPackage(spec.FullPath);
-        package.CreatePackage(outputDirectory);
+        package.CreatePackage(MakeAbsolute(Directory(outputDirectory)).FullPath);
     }
 });
 
