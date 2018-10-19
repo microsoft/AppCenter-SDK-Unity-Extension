@@ -83,40 +83,6 @@ static int ExecuteUnityCommand(string extraArgs, string projectPath = ".")
     return result;
 }
 
-// appType usually "Puppet" or "Demo"
-static string GetBuildFolder(string appType, string projectPath)
-{
-     return projectPath + "/" + Statics.TemporaryPrefix + appType + "Builds";
-}
-
-static void ExecuteUnityMethod(string buildMethodName, string buildTarget = null, string projectPath = ".")
-{
-    Statics.Context.Information("Executing method " + buildMethodName + ", this could take a while...");
-    var command = "-executeMethod " + buildMethodName; 
-    if (buildTarget != null)
-    {
-        command += " -buildTarget " + buildTarget;
-    }
-    var result = ExecuteUnityCommand(command, projectPath);
-    if (result != 0)
-    {
-        throw new Exception("Failed to execute method " + buildMethodName + ".");
-    }
-}
-
-// Copy files to a clean directory using string names instead of FilePath[] and DirectoryPath
-static void CopyFiles(IEnumerable<string> files, string targetDirectory, bool clean = true)
-{
-    if (clean)
-    {
-        CleanDirectory(targetDirectory);
-    }
-    foreach (var file in files)
-    {
-        Statics.Context.CopyFile(file, targetDirectory + "/" + System.IO.Path.GetFileName(file));
-    }
-}
-
 static void DeleteDirectoryIfExists(string directoryName)
 {
     if (Statics.Context.DirectoryExists(directoryName))
