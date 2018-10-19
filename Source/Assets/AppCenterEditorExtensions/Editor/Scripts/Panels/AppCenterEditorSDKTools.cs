@@ -12,7 +12,7 @@ namespace AppCenterEditor
     {
         public static bool IsInstalled { get { return GetAppCenterSettings() != null; } }
 
-        private const string LatestKnownSdkVersion = "0.1.2";
+        private const string LatestKnownSdkVersion = "0.1.3";
         private const string AnalyticsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterAnalytics-v{0}.unitypackage";
         private const string CrashesDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterCrashes-v{0}.unitypackage";
         private const string DistributeDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterDistribute-v{0}.unitypackage";
