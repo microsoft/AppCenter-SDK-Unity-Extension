@@ -3,8 +3,6 @@
 Welcome to the home of App Center Unity Editor Extension plugin, the best interface for viewing and configuring our App Center Unity SDK.
 We will be adding to this platform as App Center's Unity SDK features grow.
 
-![App Center Editor Extension](Images/AppCenterSDKEditorExtension.png)
-
 ## Features:
 
 * **Automated SDK installation, upgrading & removal** - Now pain free!
