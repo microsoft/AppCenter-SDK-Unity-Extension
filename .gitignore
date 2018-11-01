@@ -1,1 +1,3 @@
 *.unitypackage
+/Source/Assets/AppCenter/
+/Source/Assets/AppCenter.meta

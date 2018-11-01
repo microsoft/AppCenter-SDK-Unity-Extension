@@ -148,7 +148,7 @@ namespace AppCenterEditor
                     using (new AppCenterGuiFieldHelper.UnityHorizontal())
                     {
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("UPGRADE EDITOR EXTENSION", AppCenterEditorHelper.uiStyle.GetStyle("textButtonOr")))
+                        if (GUILayout.Button("UPGRADE EDITOR EXTENSION", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta")))
                         {
                             UpgradeEdEx();
                         }
