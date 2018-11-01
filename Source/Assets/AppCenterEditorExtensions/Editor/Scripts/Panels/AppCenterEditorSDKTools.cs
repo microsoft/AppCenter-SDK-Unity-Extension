@@ -12,10 +12,12 @@ namespace AppCenterEditor
     {
         public static bool IsInstalled { get { return GetAppCenterSettings() != null; } }
 
-        private const string LatestKnownSdkVersion = "0.1.3";
         private const string AnalyticsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterAnalytics-v{0}.unitypackage";
         private const string CrashesDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterCrashes-v{0}.unitypackage";
         private const string DistributeDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterDistribute-v{0}.unitypackage";
+        private const string AnalyticsLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterAnalyticsLatest.unitypackage";
+        private const string CrashesLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterCrashesLatest.unitypackage";
+        private const string DistributeLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterDistributeLatest.unitypackage";
         private static Type appCenterSettingsType = null;
         private static bool isInitialized; //used to check once, gets reset after each compile;
         private static string installedSdkVersion = string.Empty;
@@ -219,25 +221,29 @@ namespace AppCenterEditor
 
         public static void ImportLatestSDK(string existingSdkPath = null)
         {
-            string versionToDownload;
-            if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
-            {
-                Debug.LogWarning("Failed to obtain latest SDK version, donwloading latest known version: " + LatestKnownSdkVersion);
-                versionToDownload = LatestKnownSdkVersion;
-            }
-            else
-            {
-                Debug.Log("Downloading latest SDK version: " + latestSdkVersion);
-                versionToDownload = latestSdkVersion;
-            }
             try
             {
-                var downloadUrls = new[]
+                string[] downloadUrls = null;
+                if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
                 {
-                    string.Format(AnalyticsDownloadFormat, versionToDownload),
-                    string.Format(CrashesDownloadFormat, versionToDownload),
-                    string.Format(DistributeDownloadFormat, versionToDownload)
-                };
+                    Debug.Log("Downloading latest SDK version");
+                    downloadUrls = new[]
+                    {
+                        AnalyticsLatestDownload,
+                        CrashesLatestDownload,
+                        DistributeLatestDownload
+                    };
+                }
+                else
+                {
+                    Debug.Log("Downloading latest SDK version: " + latestSdkVersion);
+                    downloadUrls = new[]
+                    {
+                        string.Format(AnalyticsDownloadFormat, latestSdkVersion),
+                        string.Format(CrashesDownloadFormat, latestSdkVersion),
+                        string.Format(DistributeDownloadFormat, latestSdkVersion)
+                    };
+                }
                 AppCenterEditorHttp.MakeDownloadCall(downloadUrls, downloadedFiles =>
                 {
                     try
