@@ -10,7 +10,7 @@ namespace AppCenterEditor
 {
     public class AppCenterEditorSDKTools : Editor
     {
-        public static bool IsInstalled { get { return GetAppCenterSettings() != null; } }
+        public static bool IsInstalled { get { return CheckIfAllPackagesInstalled(); } }
         public static bool IsInstalling { get; set; }
         public static string LatestSdkVersion { get; private set; }
 
@@ -184,19 +184,17 @@ namespace AppCenterEditor
                             GUILayout.FlexibleSpace();
                         }
                     }
+
+                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("VIEW RELEASE NOTES", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
+                        {
+                            Application.OpenURL("https://github.com/Microsoft/AppCenter-SDK-Unity/releases");
+                        }
+                        GUILayout.FlexibleSpace();
+                    }
                 }
-            }
-
-            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
-            {
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("VIEW RELEASE NOTES", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
-                {
-                    Application.OpenURL("https://github.com/Microsoft/AppCenter-SDK-Unity/releases");
-                }
-
-                GUILayout.FlexibleSpace();
             }
         }
 
@@ -246,6 +244,23 @@ namespace AppCenterEditor
             PackagesInstaller.ImportLatestSDK(packages, LatestSdkVersion, existingSdkPath);
         }
 
+        public static bool CheckIfAllPackagesInstalled()
+        {
+            if (!AppCenterAnalyticsPackage.Instance.IsPackageInstalled())
+            {
+                return false;
+            }
+            if (!AppCenterDistributePackage.Instance.IsPackageInstalled())
+            {
+                return false;
+            }
+            if (!AppCenterCrashesPackage.Instance.IsPackageInstalled())
+            {
+                return false;
+            }
+            return GetAppCenterSettings() != null;
+        }
+
         public static Type GetAppCenterSettings()
         {
             if (appCenterSettingsType == typeof(object))
@@ -290,9 +305,29 @@ namespace AppCenterEditor
         {
             if (EditorUtility.DisplayDialog("Confirm SDK Upgrade", "This action will remove the current App Center SDK and install the lastet version.", "Confirm", "Cancel"))
             {
+                IEnumerable<AppCenterSDKPackage> installedPackages = GetInstalledPackages();
                 RemoveSdkBeforeUpdate();
+                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion);
                 ImportLatestSDK(AppCenterEditorPrefsSO.Instance.SdkPath);
             }
+        }
+
+        private static IEnumerable<AppCenterSDKPackage> GetInstalledPackages()
+        {
+            List<AppCenterSDKPackage> installedPackages = new List<AppCenterSDKPackage>();
+            if (AppCenterAnalyticsPackage.Instance.IsPackageInstalled())
+            {
+                installedPackages.Add(AppCenterAnalyticsPackage.Instance);
+            }
+            if (AppCenterCrashesPackage.Instance.IsPackageInstalled())
+            {
+                installedPackages.Add(AppCenterCrashesPackage.Instance);
+            }
+            if (AppCenterDistributePackage.Instance.IsPackageInstalled())
+            {
+                installedPackages.Add(AppCenterDistributePackage.Instance);
+            }
+            return installedPackages;
         }
 
         private static void RemoveSdkBeforeUpdate()
