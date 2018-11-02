@@ -217,7 +217,7 @@ namespace AppCenterEditor
 
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
                 {
-                    var buttonWidth = 200;
+                    var buttonWidth = 250;
 
                     GUILayout.FlexibleSpace();
                     if (isInstalling)
@@ -228,7 +228,7 @@ namespace AppCenterEditor
                     }
                     else
                     {
-                        if (GUILayout.Button("Install App Center SDK", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
+                        if (GUILayout.Button("Install all App Center packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                         {
                             isInstalling = true;
                             ImportLatestSDK();
@@ -236,6 +236,8 @@ namespace AppCenterEditor
                     }
                     GUILayout.FlexibleSpace();
                 }
+
+                GUILayout.Space(10);
             }
         }
 

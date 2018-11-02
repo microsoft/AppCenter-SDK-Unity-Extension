@@ -14,6 +14,7 @@ namespace AppCenterEditor
         protected abstract bool IsSdkPackageSupported();
         public abstract bool IsPackageInstalled();
         protected abstract void RemovePackage();
+        private static int angle = 0;
 
         public void ShowPackageInstalledMenu()
         {
@@ -37,7 +38,6 @@ namespace AppCenterEditor
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
                     EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, string.IsNullOrEmpty(sdkPackageVersion) ? "Unknown" : sdkPackageVersion), labelStyle);
                     GUILayout.FlexibleSpace();
-
                 }
 
                 if (!IsObjectFieldActive)
@@ -83,9 +83,9 @@ namespace AppCenterEditor
 
         public void ShowPackageNotInstalledMenu()
         {
-            using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+            using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
             {
-                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
+                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
                 {
                     GUILayout.FlexibleSpace();
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
@@ -99,12 +99,12 @@ namespace AppCenterEditor
                     if (IsPackageInstalling)
                     {
                         GUI.enabled = false;
-                        //  var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
-                        //  GUILayout.Button(new GUIContent("  SDK is installing", image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
+                        var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
+                        GUILayout.Button(new GUIContent(string.Format("  {0} SDK is installing", Name), image), AppCenterEditorHelper.uiStyle.GetStyle("customButton"), GUILayout.MaxWidth(200), GUILayout.MinHeight(32));
                     }
                     else
                     {
-                        if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
+                        if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta")))
                         {
                             IsPackageInstalling = true;
                             ImportLatestPackageSDK();
