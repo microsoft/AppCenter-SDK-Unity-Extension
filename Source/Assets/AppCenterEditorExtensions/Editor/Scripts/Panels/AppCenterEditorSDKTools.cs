@@ -15,7 +15,7 @@ namespace AppCenterEditor
         public static string LatestSdkVersion { get; private set; }
 
         private static Type appCenterSettingsType = null;
-        private static bool isInitialized; //used to check once, gets reset after each compile;
+        private static bool isInitialized; // used to check once, gets reset after each compile
         private static string installedSdkVersion = string.Empty;
         private static UnityEngine.Object sdkFolder;
         private static UnityEngine.Object _previousSdkFolderPath;
@@ -57,7 +57,7 @@ namespace AppCenterEditor
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                 {
                     GUILayout.FlexibleSpace();
-                    if (sdkPackage.IsPackageInstalled())
+                    if (sdkPackage.IsInstalled)
                     {
                         sdkPackage.ShowPackageInstalledMenu();
                     }
@@ -89,7 +89,7 @@ namespace AppCenterEditor
             var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
             using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
             {
-                EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(installedSdkVersion) ? "Unknown" : installedSdkVersion),
+                EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(installedSdkVersion) ? Constants.UnknownVersion : installedSdkVersion),
                     labelStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
 
                 if (!isObjectFieldActive)
@@ -220,7 +220,7 @@ namespace AppCenterEditor
                     }
                     else
                     {
-                        if (GUILayout.Button("Install all App Center packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
+                        if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                         {
                             IsInstalling = true;
                             ImportLatestSDK();
@@ -235,28 +235,17 @@ namespace AppCenterEditor
 
         public static void ImportLatestSDK(string existingSdkPath = null)
         {
-            var packages = new AppCenterSDKPackage[]
-            {
-                AppCenterAnalyticsPackage.Instance,
-                AppCenterCrashesPackage.Instance,
-                AppCenterDistributePackage.Instance
-            };
-            PackagesInstaller.ImportLatestSDK(packages, LatestSdkVersion, existingSdkPath);
+            PackagesInstaller.ImportLatestSDK(AppCenterSDKPackage.SupportedPackages, LatestSdkVersion, existingSdkPath);
         }
 
         public static bool CheckIfAllPackagesInstalled()
         {
-            if (!AppCenterAnalyticsPackage.Instance.IsPackageInstalled())
+            foreach (var package in AppCenterSDKPackage.SupportedPackages)
             {
-                return false;
-            }
-            if (!AppCenterDistributePackage.Instance.IsPackageInstalled())
-            {
-                return false;
-            }
-            if (!AppCenterCrashesPackage.Instance.IsPackageInstalled())
-            {
-                return false;
+                if (!package.IsInstalled)
+                {
+                    return false;
+                }
             }
             return GetAppCenterSettings() != null;
         }
@@ -283,12 +272,12 @@ namespace AppCenterEditor
 
         private static bool ShowSDKUpgrade()
         {
-            if (string.IsNullOrEmpty(LatestSdkVersion) || LatestSdkVersion == "Unknown")
+            if (string.IsNullOrEmpty(LatestSdkVersion) || LatestSdkVersion == Constants.UnknownVersion)
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(installedSdkVersion) || installedSdkVersion == "Unknown")
+            if (string.IsNullOrEmpty(installedSdkVersion) || installedSdkVersion == Constants.UnknownVersion)
             {
                 return true;
             }
@@ -314,18 +303,13 @@ namespace AppCenterEditor
 
         private static IEnumerable<AppCenterSDKPackage> GetInstalledPackages()
         {
-            List<AppCenterSDKPackage> installedPackages = new List<AppCenterSDKPackage>();
-            if (AppCenterAnalyticsPackage.Instance.IsPackageInstalled())
+            var installedPackages = new List<AppCenterSDKPackage>();
+            foreach (var package in AppCenterSDKPackage.SupportedPackages)
             {
-                installedPackages.Add(AppCenterAnalyticsPackage.Instance);
-            }
-            if (AppCenterCrashesPackage.Instance.IsPackageInstalled())
-            {
-                installedPackages.Add(AppCenterCrashesPackage.Instance);
-            }
-            if (AppCenterDistributePackage.Instance.IsPackageInstalled())
-            {
-                installedPackages.Add(AppCenterDistributePackage.Instance);
+                if (package.IsInstalled)
+                {
+                    installedPackages.Add(package);
+                }
             }
             return installedPackages;
         }
@@ -396,33 +380,37 @@ namespace AppCenterEditor
             if (!string.IsNullOrEmpty(installedSdkVersion))
                 return;
 
-            var types = new List<Type>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
                     foreach (var type in assembly.GetTypes())
-                        if (type.Name == AppCenterEditorHelper.APPCENTER_WRAPPER_SDK_TYPENAME)
-                            types.Add(type);
+                    {
+                        foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                        {
+                            package.CheckIfInstalled(type);
+                        }
+                        if (type.FullName == "Microsoft.AppCenter.Unity.WrapperSdk")
+                        {
+                            foreach (var field in type.GetFields())
+                            {
+                                if (field.Name == "WrapperSdkVersion")
+                                {
+                                    installedSdkVersion = field.GetValue(field).ToString();
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
                 catch (ReflectionTypeLoadException)
                 {
                     // For this failure, silently skip this assembly unless we have some expectation that it contains App Center
                     if (assembly.FullName.StartsWith("Assembly-CSharp")) // The standard "source-code in unity proj" assembly name
-                        Debug.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
-                    continue;
-                }
-            }
-
-            foreach (var type in types)
-            {
-                foreach (var field in type.GetFields())
-                {
-                    if (field.Name == "WrapperSdkVersion")
                     {
-                        installedSdkVersion = field.GetValue(field).ToString();
-                        break;
+                        Debug.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
                     }
+                    continue;
                 }
             }
         }
@@ -435,7 +423,7 @@ namespace AppCenterEditor
             {
                 AppCenterEditorHttp.MakeGitHubApiCall("https://api.github.com/repos/Microsoft/AppCenter-SDK-Unity/git/refs/tags", (version) =>
                 {
-                    LatestSdkVersion = version ?? "Unknown";
+                    LatestSdkVersion = version ?? Constants.UnknownVersion;
                     AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = LatestSdkVersion;
                 });
             }

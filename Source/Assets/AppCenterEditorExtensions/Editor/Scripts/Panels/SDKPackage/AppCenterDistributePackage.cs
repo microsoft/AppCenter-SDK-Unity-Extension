@@ -4,94 +4,27 @@
     {
         private const string DistributeLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterDistributeLatest.unitypackage";
         private const string DistributeDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterDistribute-v{0}.unitypackage";
+        private UnityEngine.Object pfodler;
 
         public static AppCenterDistributePackage Instance = new AppCenterDistributePackage();
 
-        public override string Name
-        {
-            get
-            {
-                return "Distribute";
-            }
-        }
+        public override string TypeName { get { return "Microsoft.AppCenter.Unity.Distribute.Distribute"; } }
 
-        public override string DownloadLatestUrl
-        {
-            get
-            {
-                return DistributeLatestDownload;
-            }
-        }
+        public override string VersionFieldName { get { return "DistributeSDKVersion"; } }
 
-        public override string DownloadUrlFormat
-        {
-            get
-            {
-                return DistributeDownloadFormat;
-            }
-        }
+        public override string Name { get { return "Distribute"; } }
 
-        public override string InstalledVersion
-        {
-            get
-            {
-                return "";
-            }
-            set
-            {
-            }
-        }
+        public override string DownloadLatestUrl { get { return DistributeLatestDownload; } }
 
-        public override bool IsPackageInstalling
-        {
-            get
-            {
-                return true;
-            }
-            set
-            {
-            }
-        }
+        public override string DownloadUrlFormat { get { return DistributeDownloadFormat; } }
 
-        public override bool IsObjectFieldActive
-        {
-            get
-            {
-                return false;
-            }
-            set
-            {
-            }
-        }
-        private UnityEngine.Object pfodler;
+        public override bool IsPackageInstalling { get { return false; } set { } }
 
-        public override UnityEngine.Object SdkPackageFolder
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-                pfodler = value;
-            }
-        }
+        public override bool IsObjectFieldActive { get { return true; } set { } }
 
-        public override UnityEngine.Object PreviousSdkPackageFolder
-        {
-            get
-            {
-                return new UnityEngine.Object();
-            }
-            set
-            {
-            }
-        }
+        public override UnityEngine.Object SdkPackageFolder { get { return null; } set { pfodler = value; } }
 
-        public override bool IsPackageInstalled()
-        {
-            return true;
-        }
+        public override UnityEngine.Object PreviousSdkPackageFolder { get { return new UnityEngine.Object(); } set { } }
 
         protected override bool IsSdkPackageSupported()
         {

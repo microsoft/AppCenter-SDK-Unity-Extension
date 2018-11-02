@@ -7,89 +7,23 @@
 
         public static AppCenterCrashesPackage Instance = new AppCenterCrashesPackage();
 
-        public override string Name
-        {
-            get
-            {
-                return "Crashes";
-            }
-        }
+        public override string Name { get { return "Crashes"; } }
 
-        public override string DownloadLatestUrl
-        {
-            get
-            {
-                return CrashesLatestDownload;
-            }
-        }
+        public override string TypeName { get { return "Microsoft.AppCenter.Unity.Crashes.Crashes"; } }
 
-        public override string DownloadUrlFormat
-        {
-            get
-            {
-                return CrashesDownloadFormat;
-            }
-        }
+        public override string VersionFieldName { get { return "CrashesSDKVersion"; } }
 
-        public override string InstalledVersion
-        {
-            get
-            {
-                return "";
-            }
-            set
-            {
-            }
-        }
+        public override string DownloadLatestUrl { get { return CrashesLatestDownload; } }
 
-        public override bool IsPackageInstalling
-        {
-            get
-            {
-                return true;
-            }
-            set
-            {
-            }
-        }
+        public override string DownloadUrlFormat { get { return CrashesDownloadFormat; } }
 
-        public override bool IsObjectFieldActive
-        {
-            get
-            {
-                return true;
-            }
-            set
-            {
-            }
-        }
+        public override bool IsPackageInstalling { get { return false; } set { } }
 
-        public override UnityEngine.Object SdkPackageFolder
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-            }
-        }
+        public override bool IsObjectFieldActive { get { return true; } set { } }
 
-        public override UnityEngine.Object PreviousSdkPackageFolder
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-            }
-        }
+        public override UnityEngine.Object SdkPackageFolder { get { return null; } set { } }
 
-        public override bool IsPackageInstalled()
-        {
-            return false;
-        }
+        public override UnityEngine.Object PreviousSdkPackageFolder { get { return null; } set { } }
 
         protected override bool IsSdkPackageSupported()
         {

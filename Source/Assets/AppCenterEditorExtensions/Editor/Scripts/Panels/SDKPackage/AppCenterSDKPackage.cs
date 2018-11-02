@@ -1,22 +1,35 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace AppCenterEditor
 {
     public abstract class AppCenterSDKPackage
     {
+        private static int angle = 0;
+
+        public static IEnumerable<AppCenterSDKPackage> SupportedPackages = new AppCenterSDKPackage[]
+        {
+            AppCenterAnalyticsPackage.Instance,
+            AppCenterCrashesPackage.Instance,
+            AppCenterDistributePackage.Instance
+        };
+
+        public string InstalledVersion { get; private set; }
+        public bool IsInstalled { get; private set; }
         public abstract string Name { get; }
-        public abstract string InstalledVersion { get; set; }
         public abstract bool IsPackageInstalling { get; set; }
         public abstract bool IsObjectFieldActive { get; set; }
         public abstract UnityEngine.Object SdkPackageFolder { get; set; }
         public abstract UnityEngine.Object PreviousSdkPackageFolder { get; set; }
         public abstract string DownloadLatestUrl { get; }
         public abstract string DownloadUrlFormat { get; }
+        public abstract string TypeName { get; }
+        public abstract string VersionFieldName { get; }
+
         protected abstract bool IsSdkPackageSupported();
-        public abstract bool IsPackageInstalled();
         protected abstract void RemovePackage();
-        private static int angle = 0;
 
         public void ShowPackageInstalledMenu()
         {
@@ -38,7 +51,7 @@ namespace AppCenterEditor
                     GUILayout.FlexibleSpace();
                     var sdkPackageVersion = InstalledVersion;
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, string.IsNullOrEmpty(sdkPackageVersion) ? "Unknown" : sdkPackageVersion), labelStyle);
+                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, string.IsNullOrEmpty(sdkPackageVersion) ? Constants.UnknownVersion : sdkPackageVersion), labelStyle);
                     GUILayout.FlexibleSpace();
                 }
 
@@ -119,13 +132,33 @@ namespace AppCenterEditor
 
         public string GetDownloadUrl(string version)
         {
-            if (string.IsNullOrEmpty(version) || version == "Unknown")
+            if (string.IsNullOrEmpty(version) || version == Constants.UnknownVersion)
             {
                 return DownloadLatestUrl;
             }
             else
             {
                 return string.Format(DownloadUrlFormat, version);
+            }
+        }
+
+        public void CheckIfInstalled(Type type)
+        {
+            if (type.FullName == TypeName)
+            {
+                IsInstalled = true;
+                foreach (var field in type.GetFields())
+                {
+                    if (field.Name == VersionFieldName)
+                    {
+                        InstalledVersion = field.GetValue(field).ToString();
+                        break;
+                    }
+                }
+                if (string.IsNullOrEmpty(InstalledVersion))
+                {
+                    InstalledVersion = Constants.UnknownVersion;
+                }
             }
         }
 
