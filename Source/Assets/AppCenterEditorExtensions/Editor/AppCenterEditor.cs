@@ -124,6 +124,7 @@ namespace AppCenterEditor
 
                 AppCenterEditorSDKTools.DrawSdkPanel();
 
+                AppCenterEditorSDKTools.DisplayPackagesPanel();
                 DisplayEditorExtensionHelpMenu();
             }
 
