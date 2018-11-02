@@ -29,13 +29,6 @@ namespace AppCenterEditor
         private static bool isInstalling = false;
         private static int angle = 0;
 
-        public enum SdkPackage
-        {
-            Analytics,
-            Crashes,
-            Distribute
-        }
-
         public static void DrawSdkPanel()
         {
             if (!isInitialized)
@@ -63,134 +56,20 @@ namespace AppCenterEditor
             }
         }
 
-
-        public static void DisplayPackagesPanel()
+        public static void DisplayPackagePanel(AppCenterSDKPackage sdkPackage)
         {
-            foreach (SdkPackage sdkPackage in (SdkPackage[])Enum.GetValues(typeof(SdkPackage)))
-            {
-                using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
-                {
-                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
-                    {
-                        GUILayout.FlexibleSpace();
-                        if (IsPackageInstalled(sdkPackage))
-                        {
-                            ShowPackageInstalledMenu(sdkPackage);
-                        }
-                        else
-                        {
-                            ShowPackageNotInstalledMenu(sdkPackage);
-                        }
-                        GUILayout.FlexibleSpace();
-                    }
-                }
-            }            
-        }
-
-        private static void ShowPackageInstalledMenu(SdkPackage sdkPackage)
-        {
-            var packageFolder = GetSdkPackageFolder(sdkPackage);
-            var isPackageSupported = IsSdkPackageSupported(sdkPackage);
-            var previousSdkPackageFolderPath = GetPreviousSdkPackageFolder(sdkPackage);
-
-            var isObjectFieldActive = packageFolder == null;
-
-            if (previousSdkPackageFolderPath != packageFolder)
-            {
-                // something changed, better save the result.
-                SetPreviousSdkPackageFolderPath(packageFolder, sdkPackage);
-
-                AppCenterEditorPrefsSO.Instance.SdkPath = (AssetDatabase.GetAssetPath(packageFolder));
-                //TODO: check if we need this?
-                // AppCenterEditorDataService.SaveEnvDetails();
-
-                SetIsPackageObjectFieldNotActive(sdkPackage);
-            }
-
             using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
             {
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                 {
                     GUILayout.FlexibleSpace();
-                    var sdkPackageVersion = GetInstalledPackageVersion(sdkPackage);
-                    var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", sdkPackage.ToString(), string.IsNullOrEmpty(sdkPackageVersion) ? "Unknown" : sdkPackageVersion), labelStyle);
-                    GUILayout.FlexibleSpace();
-
-                }                                                          
-
-                if (!isObjectFieldActive)
-                {
-                    GUI.enabled = false;
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(
-                        "An Analytics SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
-                        AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
-                }
-
-                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
-                {
-                    GUILayout.FlexibleSpace();
-                    packageFolder = EditorGUILayout.ObjectField(packageFolder, typeof(UnityEngine.Object), false, GUILayout.MaxWidth(200));
-                    SetPackageSdkFolder(packageFolder, sdkPackage);
-                    GUILayout.FlexibleSpace();
-                }
-
-                if (!isObjectFieldActive)
-                {
-                    // this is a hack to prevent our "block while loading technique" from breaking up at this point.
-                    GUI.enabled = !EditorApplication.isCompiling && AppCenterEditor.blockingRequests.Count == 0;
-                }
-
-                if (isPackageSupported && packageFolder != null)
-                {
-                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
+                    if (sdkPackage.IsPackageInstalled())
                     {
-                        GUILayout.FlexibleSpace();
-
-                        if (GUILayout.Button("Remove SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
-                        {
-                            //  RemoveAnalyticsSdk();
-                        }
-
-                        GUILayout.FlexibleSpace();
-                    }
-                }
-            }
-        }
-
-        private static void ShowPackageNotInstalledMenu(SdkPackage sdkPackage)
-        {
-            var isPackageInstalling = IsSdkPackageInstalling(sdkPackage);
-
-            using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
-            {
-                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
-                {
-                    GUILayout.FlexibleSpace();
-                    var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField("{0} SDK is not installed.", sdkPackage.ToString(), labelStyle);
-                    GUILayout.FlexibleSpace();
-                }
-
-                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
-                {
-                    GUILayout.FlexibleSpace();
-                    if (isPackageInstalling)
-                    {
-                        GUI.enabled = false;
-                      //  var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
-                      //  GUILayout.Button(new GUIContent("  SDK is installing", image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
+                        sdkPackage.ShowPackageInstalledMenu();
                     }
                     else
                     {
-                        if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
-                        {
-                            PackageIsInstalling(sdkPackage);
-                            ImportLatestPackageSDK(sdkPackage);
-                        }
+                        sdkPackage.ShowPackageNotInstalledMenu();
                     }
                     GUILayout.FlexibleSpace();
                 }
