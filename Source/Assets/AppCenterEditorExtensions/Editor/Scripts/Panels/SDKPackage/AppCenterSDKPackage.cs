@@ -11,6 +11,8 @@ namespace AppCenterEditor
         public abstract bool IsObjectFieldActive { get; set; }
         public abstract UnityEngine.Object SdkPackageFolder { get; set; }
         public abstract UnityEngine.Object PreviousSdkPackageFolder { get; set; }
+        public abstract string DownloadLatestUrl { get; }
+        public abstract string DownloadUrlFormat { get; }
         protected abstract bool IsSdkPackageSupported();
         public abstract bool IsPackageInstalled();
         protected abstract void RemovePackage();
@@ -115,9 +117,21 @@ namespace AppCenterEditor
             }
         }
 
+        public string GetDownloadUrl(string version)
+        {
+            if (string.IsNullOrEmpty(version) || version == "Unknown")
+            {
+                return DownloadLatestUrl;
+            }
+            else
+            {
+                return string.Format(DownloadUrlFormat, version);
+            }
+        }
+
         private void ImportLatestPackageSDK()
         {
-
+            PackagesInstaller.ImportLatestSDK(new[] { this }, AppCenterEditorSDKTools.LatestSdkVersion);
         }
     }
 }

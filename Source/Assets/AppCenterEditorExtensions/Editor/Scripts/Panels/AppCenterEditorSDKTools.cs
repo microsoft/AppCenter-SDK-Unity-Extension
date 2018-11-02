@@ -11,22 +11,16 @@ namespace AppCenterEditor
     public class AppCenterEditorSDKTools : Editor
     {
         public static bool IsInstalled { get { return GetAppCenterSettings() != null; } }
+        public static bool IsInstalling { get; set; }
+        public static string LatestSdkVersion { get; private set; }
 
-        private const string AnalyticsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterAnalytics-v{0}.unitypackage";
-        private const string CrashesDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterCrashes-v{0}.unitypackage";
-        private const string DistributeDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterDistribute-v{0}.unitypackage";
-        private const string AnalyticsLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterAnalyticsLatest.unitypackage";
-        private const string CrashesLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterCrashesLatest.unitypackage";
-        private const string DistributeLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterDistributeLatest.unitypackage";
         private static Type appCenterSettingsType = null;
         private static bool isInitialized; //used to check once, gets reset after each compile;
         private static string installedSdkVersion = string.Empty;
-        private static string latestSdkVersion = string.Empty;
         private static UnityEngine.Object sdkFolder;
         private static UnityEngine.Object _previousSdkFolderPath;
         private static bool isObjectFieldActive;
         public static bool isSdkSupported = true;
-        private static bool isInstalling = false;
         private static int angle = 0;
 
         public static void DrawSdkPanel()
@@ -167,17 +161,17 @@ namespace AppCenterEditor
                         if (ShowSDKUpgrade() && isSdkSupported)
                         {
                             GUILayout.FlexibleSpace();
-                            if (isInstalling)
+                            if (IsInstalling)
                             {
                                 GUI.enabled = false;
                                 var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
-                                GUILayout.Button(new GUIContent("  Upgrading to " + latestSdkVersion, image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
+                                GUILayout.Button(new GUIContent("  Upgrading to " + LatestSdkVersion, image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
                             }
                             else
                             {
-                                if (GUILayout.Button("Upgrade to " + latestSdkVersion, AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MinHeight(32)))
+                                if (GUILayout.Button("Upgrade to " + LatestSdkVersion, AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MinHeight(32)))
                                 {
-                                    isInstalling = true;
+                                    IsInstalling = true;
                                     UpgradeSdk();
                                 }
                             }
@@ -220,7 +214,7 @@ namespace AppCenterEditor
                     var buttonWidth = 250;
 
                     GUILayout.FlexibleSpace();
-                    if (isInstalling)
+                    if (IsInstalling)
                     {
                         GUI.enabled = false;
                         var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
@@ -230,7 +224,7 @@ namespace AppCenterEditor
                     {
                         if (GUILayout.Button("Install all App Center packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                         {
-                            isInstalling = true;
+                            IsInstalling = true;
                             ImportLatestSDK();
                         }
                     }
@@ -243,55 +237,13 @@ namespace AppCenterEditor
 
         public static void ImportLatestSDK(string existingSdkPath = null)
         {
-            try
+            var packages = new AppCenterSDKPackage[]
             {
-                string[] downloadUrls = null;
-                if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
-                {
-                    Debug.Log("Downloading latest SDK version");
-                    downloadUrls = new[]
-                    {
-                        AnalyticsLatestDownload,
-                        CrashesLatestDownload,
-                        DistributeLatestDownload
-                    };
-                }
-                else
-                {
-                    Debug.Log("Downloading latest SDK version: " + latestSdkVersion);
-                    downloadUrls = new[]
-                    {
-                        string.Format(AnalyticsDownloadFormat, latestSdkVersion),
-                        string.Format(CrashesDownloadFormat, latestSdkVersion),
-                        string.Format(DistributeDownloadFormat, latestSdkVersion)
-                    };
-                }
-                AppCenterEditorHttp.MakeDownloadCall(downloadUrls, downloadedFiles =>
-                {
-                    try
-                    {
-                        foreach (var file in downloadedFiles)
-                        {
-                            Debug.Log("Importing package: " + file);
-                            AssetDatabase.ImportPackage(file, false);
-                            Debug.Log("Deleteing file: " + file);
-                            FileUtil.DeleteFileOrDirectory(file);
-                        }
-                        AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;
-                        //AppCenterEditorDataService.SaveEnvDetails();
-                        Debug.Log("App Center SDK install complete");
-                    }
-                    finally
-                    {
-                        isInstalling = false;
-                    }
-                });
-            }
-            catch
-            {
-                isInstalling = false;
-                throw;
-            }
+                AppCenterAnalyticsPackage.Instance,
+                AppCenterCrashesPackage.Instance,
+                AppCenterDistributePackage.Instance
+            };
+            PackagesInstaller.ImportLatestSDK(packages, LatestSdkVersion, existingSdkPath);
         }
 
         public static Type GetAppCenterSettings()
@@ -316,7 +268,7 @@ namespace AppCenterEditor
 
         private static bool ShowSDKUpgrade()
         {
-            if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
+            if (string.IsNullOrEmpty(LatestSdkVersion) || LatestSdkVersion == "Unknown")
             {
                 return false;
             }
@@ -327,7 +279,7 @@ namespace AppCenterEditor
             }
 
             string[] currrent = installedSdkVersion.Split('.');
-            string[] latest = latestSdkVersion.Split('.');
+            string[] latest = LatestSdkVersion.Split('.');
 
             return int.Parse(latest[0]) > int.Parse(currrent[0])
                 || int.Parse(latest[1]) > int.Parse(currrent[1])
@@ -448,13 +400,13 @@ namespace AppCenterEditor
             {
                 AppCenterEditorHttp.MakeGitHubApiCall("https://api.github.com/repos/Microsoft/AppCenter-SDK-Unity/git/refs/tags", (version) =>
                 {
-                    latestSdkVersion = version ?? "Unknown";
-                    AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = latestSdkVersion;
+                    LatestSdkVersion = version ?? "Unknown";
+                    AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = LatestSdkVersion;
                 });
             }
             else
             {
-                latestSdkVersion = AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion;
+                LatestSdkVersion = AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion;
             }
         }
 

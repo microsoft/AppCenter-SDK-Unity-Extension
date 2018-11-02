@@ -2,11 +2,32 @@
 {
     public class AppCenterAnalyticsPackage : AppCenterSDKPackage
     {
+        private const string AnalyticsLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterAnalyticsLatest.unitypackage";
+        private const string AnalyticsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterAnalytics-v{0}.unitypackage";
+
+        public static AppCenterAnalyticsPackage Instance = new AppCenterAnalyticsPackage();
+
         public override string Name
         {
             get
             {
                 return "Analytics";
+            }
+        }
+
+        public override string DownloadLatestUrl
+        {
+            get
+            {
+                return AnalyticsLatestDownload;
+            }
+        }
+
+        public override string DownloadUrlFormat
+        {
+            get
+            {
+                return AnalyticsDownloadFormat;
             }
         }
 
@@ -70,16 +91,16 @@
             return false;
         }
 
-        //protected override void ImportLatestPackageSDK()
-        //{
-        //}
-
         protected override bool IsSdkPackageSupported()
         {
             return true;
         }
 
         protected override void RemovePackage()
+        {
+        }
+
+        private AppCenterAnalyticsPackage()
         {
         }
     }

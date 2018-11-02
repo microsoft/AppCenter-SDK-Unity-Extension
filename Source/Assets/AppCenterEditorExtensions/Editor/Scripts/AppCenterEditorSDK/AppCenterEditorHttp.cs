@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,11 +21,11 @@ namespace AppCenterEditor
             }, AppCenterEditorHelper.SharedErrorCallback), www);
         }
 
-        internal static void MakeDownloadCall(string[] urls, Action<IEnumerable<string>> resultCallback)
+        internal static void MakeDownloadCall(IEnumerable<string> urls, Action<IEnumerable<string>> resultCallback)
         {
-            Debug.Log("Downloading files: " + string.Join(", ", urls));
-            var wwws = new List<WWW>(urls.Length);
-            var downloadRequests = new List<DownloadRequest>(urls.Length);
+            Debug.Log("Downloading files: " + string.Join(", ", urls.ToArray()));
+            var wwws = new List<WWW>();
+            var downloadRequests = new List<DownloadRequest>();
             foreach (var url in urls)
             {
                 var www = new WWW(url);

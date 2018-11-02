@@ -1,18 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace AppCenterEditor
+﻿namespace AppCenterEditor
 {
     public class AppCenterCrashesPackage : AppCenterSDKPackage
     {
+        private const string CrashesLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterCrashesLatest.unitypackage";
+        private const string CrashesDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterCrashes-v{0}.unitypackage";
+
+        public static AppCenterCrashesPackage Instance = new AppCenterCrashesPackage();
+
         public override string Name
         {
             get
             {
                 return "Crashes";
+            }
+        }
+
+        public override string DownloadLatestUrl
+        {
+            get
+            {
+                return CrashesLatestDownload;
+            }
+        }
+
+        public override string DownloadUrlFormat
+        {
+            get
+            {
+                return CrashesDownloadFormat;
             }
         }
 
@@ -36,7 +51,7 @@ namespace AppCenterEditor
             set
             {
             }
-        }        
+        }
 
         public override bool IsObjectFieldActive
         {
@@ -76,17 +91,17 @@ namespace AppCenterEditor
             return false;
         }
 
-        protected override void ImportLatestPackageSDK()
-        {
-        }
-
         protected override bool IsSdkPackageSupported()
         {
             return true;
         }
 
         protected override void RemovePackage()
-        { 
+        {
+        }
+
+        private AppCenterCrashesPackage()
+        {
         }
     }
 }
