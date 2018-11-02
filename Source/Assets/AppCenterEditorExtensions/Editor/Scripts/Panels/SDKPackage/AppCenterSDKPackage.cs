@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace AppCenterEditor
@@ -14,11 +9,10 @@ namespace AppCenterEditor
         public abstract string InstalledVersion { get; set; }
         public abstract bool IsPackageInstalling { get; set; }
         public abstract bool IsObjectFieldActive { get; set; }
-        public abstract UnityEngine.Object SdkPackageFolder { get; set;  }
+        public abstract UnityEngine.Object SdkPackageFolder { get; set; }
         public abstract UnityEngine.Object PreviousSdkPackageFolder { get; set; }
         protected abstract bool IsSdkPackageSupported();
-        public abstract bool IsPackageInstalled();        
-        protected abstract void ImportLatestPackageSDK();
+        public abstract bool IsPackageInstalled();
         protected abstract void RemovePackage();
         private static int angle = 0;
 
@@ -119,6 +113,11 @@ namespace AppCenterEditor
                     GUILayout.FlexibleSpace();
                 }
             }
+        }
+
+        private void ImportLatestPackageSDK()
+        {
+
         }
     }
 }
