@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace AppCenterEditor
+﻿namespace AppCenterEditor
 {
     public class AppCenterAnalyticsPackage : AppCenterSDKPackage
     {
@@ -36,7 +30,7 @@ namespace AppCenterEditor
             set
             {
             }
-        }        
+        }
 
         public override bool IsObjectFieldActive
         {
@@ -76,9 +70,9 @@ namespace AppCenterEditor
             return false;
         }
 
-        protected override void ImportLatestPackageSDK()
-        {
-        }
+        //protected override void ImportLatestPackageSDK()
+        //{
+        //}
 
         protected override bool IsSdkPackageSupported()
         {
@@ -86,7 +80,7 @@ namespace AppCenterEditor
         }
 
         protected override void RemovePackage()
-        { 
+        {
         }
     }
 }
