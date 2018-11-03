@@ -13,6 +13,8 @@
 
         public override string Name { get { return "Distribute"; } }
 
+        protected override bool IsSupportedForWSA { get { return false; } }
+
         public override string DownloadLatestUrl { get { return DistributeLatestDownload; } }
 
         public override string DownloadUrlFormat { get { return DistributeDownloadFormat; } }

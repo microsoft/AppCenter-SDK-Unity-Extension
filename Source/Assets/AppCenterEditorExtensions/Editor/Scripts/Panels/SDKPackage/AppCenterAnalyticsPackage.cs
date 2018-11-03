@@ -9,6 +9,8 @@
 
         public override string Name { get { return "Analytics"; } }
 
+        protected override bool IsSupportedForWSA { get { return true; } }
+
         public override string TypeName { get { return "Microsoft.AppCenter.Unity.Analytics.Analytics"; } }
 
         public override string VersionFieldName { get { return "AnalyticsSDKVersion"; } }

@@ -9,6 +9,8 @@
 
         public override string Name { get { return "Crashes"; } }
 
+        protected override bool IsSupportedForWSA { get { return false; } }
+
         public override string TypeName { get { return "Microsoft.AppCenter.Unity.Crashes.Crashes"; } }
 
         public override string VersionFieldName { get { return "CrashesSDKVersion"; } }
