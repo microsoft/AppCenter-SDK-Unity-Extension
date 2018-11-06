@@ -28,6 +28,20 @@ namespace AppCenterEditor
         public abstract string TypeName { get; }
         public abstract string VersionFieldName { get; }
         protected abstract bool IsSdkPackageSupported();
+
+        public static IEnumerable<AppCenterSDKPackage> GetInstalledPackages()
+        {
+            var installedPackages = new List<AppCenterSDKPackage>();
+            foreach (var package in SupportedPackages)
+            {
+                if (package.IsInstalled)
+                {
+                    installedPackages.Add(package);
+                }
+            }
+            return installedPackages;
+        }
+
         private void RemovePackage(bool prompt = true)
         {
             Debug.Log(string.Format("Deleting {0} package...", Name));
@@ -70,6 +84,15 @@ namespace AppCenterEditor
                 }
                 FileUtil.DeleteFileOrDirectory(path + ".meta");
             }
+
+            // Remove Core if no packages left.
+            List<AppCenterSDKPackage> installedPackages = new List<AppCenterSDKPackage>();
+            installedPackages.AddRange(GetInstalledPackages());
+            if (installedPackages.Count <= 1)
+            {
+                AppCenterEditorSDKTools.RemoveSdk(false);
+            }
+
             if (deleted)
             {
                 AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnSuccess, string.Format("App Center {0} SDK removed.", Name));

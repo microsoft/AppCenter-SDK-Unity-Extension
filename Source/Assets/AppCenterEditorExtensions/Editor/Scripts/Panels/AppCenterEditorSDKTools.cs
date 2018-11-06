@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -412,36 +412,23 @@ namespace AppCenterEditor
                 return true;
             }
 
-            string[] currrent = InstalledSdkVersion.Split('.');
+            string[] current = InstalledSdkVersion.Split('.');
             string[] latest = LatestSdkVersion.Split('.');
 
-            return int.Parse(latest[0]) > int.Parse(currrent[0])
-                || int.Parse(latest[1]) > int.Parse(currrent[1])
-                || int.Parse(latest[2]) > int.Parse(currrent[2]);
+            return int.Parse(latest[0]) > int.Parse(current[0])
+                || int.Parse(latest[1]) > int.Parse(current[1])
+                || int.Parse(latest[2]) > int.Parse(current[2]);
         }
 
         private static void UpgradeSdk()
         {
             if (EditorUtility.DisplayDialog("Confirm SDK Upgrade", "This action will remove the current App Center SDK and install the lastet version.", "Confirm", "Cancel"))
             {
-                IEnumerable<AppCenterSDKPackage> installedPackages = GetInstalledPackages();
+                IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
                 RemoveSdkBeforeUpdate();
                 PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion);
                // ImportLatestSDK(AppCenterEditorPrefsSO.Instance.SdkPath);
             }
-        }
-
-        private static IEnumerable<AppCenterSDKPackage> GetInstalledPackages()
-        {
-            var installedPackages = new List<AppCenterSDKPackage>();
-            foreach (var package in AppCenterSDKPackage.SupportedPackages)
-            {
-                if (package.IsInstalled)
-                {
-                    installedPackages.Add(package);
-                }
-            }
-            return installedPackages;
         }
 
         private static void RemoveSdkBeforeUpdate()
@@ -467,7 +454,7 @@ namespace AppCenterEditor
             }
         }
 
-        private static void RemoveSdk(bool prompt = true)
+        public static void RemoveSdk(bool prompt = true)
         {
             if (prompt && !EditorUtility.DisplayDialog("Confirm SDK Removal", "This action will remove the current App Center SDK.", "Confirm", "Cancel"))
             {
@@ -516,10 +503,6 @@ namespace AppCenterEditor
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        foreach (var package in AppCenterSDKPackage.SupportedPackages)
-                        {
-                            package.CheckIfInstalled(type);
-                        }
                         if (type.FullName == "Microsoft.AppCenter.Unity.WrapperSdk")
                         {
                             foreach (var field in type.GetFields())
@@ -530,6 +513,14 @@ namespace AppCenterEditor
                                     break;
                                 }
                             }
+                        }
+                    }
+
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                        {
+                            package.CheckIfInstalled(type);
                         }
                     }
                 }
