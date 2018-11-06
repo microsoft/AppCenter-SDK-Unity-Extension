@@ -25,11 +25,12 @@ namespace AppCenterEditor
         public static string LatestSdkVersion { get; private set; }
         public static UnityEngine.Object SdkFolder { get; private set; }
         public static string InstalledSdkVersion { get; private set; }
+        public static GUIStyle TitleStyle { get { return new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel")); } }
 
         private static Type appCenterSettingsType = null;
         private static bool isInitialized; // used to check once, gets reset after each compile
         private static UnityEngine.Object _previousSdkFolderPath;
-        private static bool isObjectFieldActive;
+        private static bool sdkFolderNotFound;
         public static bool isSdkSupported = true;
         private static int angle = 0;
 
@@ -105,7 +106,7 @@ namespace AppCenterEditor
 
         private static void ShowSdkInstallationPanel()
         {
-            isObjectFieldActive = SdkFolder == null;
+            sdkFolderNotFound = SdkFolder == null;
 
             if (_previousSdkFolderPath != SdkFolder)
             {
@@ -116,7 +117,7 @@ namespace AppCenterEditor
                 //TODO: check if we need this?
                 // AppCenterEditorDataService.SaveEnvDetails();
 
-                isObjectFieldActive = false;
+                sdkFolderNotFound = false;
             }
             SDKState SDKstate = GetSDKState();
             using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
@@ -168,23 +169,23 @@ namespace AppCenterEditor
 
         private static void ShowUpgradePanel()
         {
-            if (!isObjectFieldActive)
+            if (!sdkFolderNotFound)
             {
-                var titleLabelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
-
                 using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
                 {
                     isSdkSupported = false;
                     string[] versionNumber = !string.IsNullOrEmpty(InstalledSdkVersion) ? InstalledSdkVersion.Split('.') : new string[0];
 
                     var numerical = 0;
-                    if (string.IsNullOrEmpty(InstalledSdkVersion) || versionNumber == null || versionNumber.Length == 0 ||
-                        (versionNumber.Length > 0 && int.TryParse(versionNumber[0], out numerical) && numerical < 0))
+                    bool isEmptyVersion = string.IsNullOrEmpty(InstalledSdkVersion) || versionNumber == null || versionNumber.Length == 0;
+                    if (isEmptyVersion || (versionNumber.Length > 0 && int.TryParse(versionNumber[0], out numerical) && numerical < 0))
                     {
                         //older version of the SDK
                         using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                         {
+                            GUILayout.FlexibleSpace();
                             EditorGUILayout.LabelField("SDK is outdated. Consider upgrading to the get most features.", AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
+                            GUILayout.FlexibleSpace();
                         }
                     }
                     else if (numerical >= 0)
@@ -195,7 +196,7 @@ namespace AppCenterEditor
                     var buttonWidth = 200;
                     if (ShowSDKUpgrade() && isSdkSupported)
                     {
-                        if (IsUpgrading )
+                        if (IsUpgrading)
                         {
                             GUILayout.Space(10);
                             using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
@@ -227,7 +228,7 @@ namespace AppCenterEditor
                         using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                         {
                             GUILayout.FlexibleSpace();
-                            EditorGUILayout.LabelField("You have the latest SDK!", titleLabelStyle, GUILayout.MinHeight(32));
+                            EditorGUILayout.LabelField("You have the latest SDK!", TitleStyle, GUILayout.MinHeight(32));
                             GUILayout.FlexibleSpace();
                         }
                     }
@@ -247,7 +248,7 @@ namespace AppCenterEditor
 
         private static void ShowRemoveButton()
         {
-            if (isSdkSupported && !isObjectFieldActive)
+            if (isSdkSupported && !sdkFolderNotFound)
             {
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                 {
@@ -269,7 +270,7 @@ namespace AppCenterEditor
 
         private static void ShowFolderObject()
         {
-            if (!isObjectFieldActive)
+            if (!sdkFolderNotFound)
             {
                 GUI.enabled = false;
             }
@@ -288,7 +289,7 @@ namespace AppCenterEditor
                 GUILayout.FlexibleSpace();
             }
 
-            if (!isObjectFieldActive)
+            if (!sdkFolderNotFound)
             {
                 // this is a hack to prevent our "block while loading technique" from breaking up at this point.
                 GUI.enabled = !EditorApplication.isCompiling && AppCenterEditor.blockingRequests.Count == 0;
@@ -297,9 +298,8 @@ namespace AppCenterEditor
 
         private static void ShowSdkInstalledLabel()
         {
-            var titleLabelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
             EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
-                       titleLabelStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+                       TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
         }
 
         private static void ShowInstallingButton()
@@ -336,17 +336,12 @@ namespace AppCenterEditor
 
         private static void ShowNOSDKLabel()
         {
-            var titleLabelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
-            EditorGUILayout.LabelField("No SDK is installed.", titleLabelStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+            EditorGUILayout.LabelField("No SDK is installed.", TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
             GUILayout.Space(10);
         }
 
         public static void ImportLatestSDK(string existingSdkPath = null)
         {
-            if (string.IsNullOrEmpty(LatestSdkVersion))
-            {
-                GetLatestSdkVersion();
-            }
             PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion, existingSdkPath);
         }
 
@@ -407,10 +402,6 @@ namespace AppCenterEditor
 
         private static bool ShowSDKUpgrade()
         {
-            if (string.IsNullOrEmpty(LatestSdkVersion))
-            {
-                GetLatestSdkVersion();
-            }
             if (string.IsNullOrEmpty(LatestSdkVersion) || LatestSdkVersion == Constants.UnknownVersion)
             {
                 return false;

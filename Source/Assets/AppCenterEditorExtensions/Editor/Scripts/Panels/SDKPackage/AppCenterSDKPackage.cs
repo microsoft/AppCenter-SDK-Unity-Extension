@@ -92,13 +92,24 @@ namespace AppCenterEditor
 
             using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
             {
+                var sdkPackageVersion = InstalledVersion;
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
                 {
                     GUILayout.FlexibleSpace();
-                    var sdkPackageVersion = InstalledVersion;
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, string.IsNullOrEmpty(sdkPackageVersion) ? (string.IsNullOrEmpty(AppCenterEditorSDKTools.InstalledSdkVersion) ?  Constants.UnknownVersion : AppCenterEditorSDKTools.InstalledSdkVersion) : sdkPackageVersion), labelStyle);
+                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, sdkPackageVersion), labelStyle);                    
                     GUILayout.FlexibleSpace();
+                }
+
+                bool packageVersionIsValid = sdkPackageVersion != null && sdkPackageVersion != Constants.UnknownVersion;
+                if (packageVersionIsValid && sdkPackageVersion.CompareTo(AppCenterEditorSDKTools.InstalledSdkVersion) != 0)
+                {
+                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
+                    {
+                        GUILayout.FlexibleSpace();
+                        EditorGUILayout.LabelField("Warning! Package version is not equal to the AppCenter Core SDK version. ", AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
+                        GUILayout.FlexibleSpace();
+                    }
                 }
 
                 if (isPackageSupported && AppCenterEditorSDKTools.SdkFolder != null)
@@ -176,6 +187,10 @@ namespace AppCenterEditor
                         InstalledVersion = field.GetValue(field).ToString();
                         break;
                     }
+                }
+                if (string.IsNullOrEmpty(InstalledVersion))
+                {
+                    InstalledVersion = string.IsNullOrEmpty(AppCenterEditorSDKTools.InstalledSdkVersion) ? Constants.UnknownVersion : AppCenterEditorSDKTools.InstalledSdkVersion;
                 }
             }
         }
