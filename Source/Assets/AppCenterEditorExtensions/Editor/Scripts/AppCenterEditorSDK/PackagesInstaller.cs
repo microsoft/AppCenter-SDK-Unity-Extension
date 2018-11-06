@@ -23,7 +23,7 @@ namespace AppCenterEditor
                         {
                             Debug.Log("Importing package: " + file);
                             AssetDatabase.ImportPackage(file, false);
-                            Debug.Log("Deleteing file: " + file);
+                            Debug.Log("Deleting file: " + file);
                             FileUtil.DeleteFileOrDirectory(file);
                         }
                         AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;

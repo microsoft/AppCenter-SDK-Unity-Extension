@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -30,6 +30,7 @@ namespace AppCenterEditor
         protected abstract bool IsSdkPackageSupported();
         private void RemovePackage(bool prompt = true)
         {
+            Debug.Log(string.Format("Deleting {0} package...", Name));
             if (prompt && !EditorUtility.DisplayDialog("Confirm SDK Removal", string.Format("This action will remove the current {0} SDK.", Name), "Confirm", "Cancel"))
             {
                 return;
@@ -134,7 +135,6 @@ namespace AppCenterEditor
                     GUILayout.FlexibleSpace();
                     if (IsPackageInstalling)
                     {
-                        GUI.enabled = false;
                         var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
                         GUILayout.Button(new GUIContent(string.Format("  {0} SDK is installing", Name), image), AppCenterEditorHelper.uiStyle.GetStyle("customButton"), GUILayout.MaxWidth(200), GUILayout.MinHeight(32));
                     }
@@ -142,6 +142,7 @@ namespace AppCenterEditor
                     {
                         if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta")))
                         {
+                            AppCenterEditorSDKTools.IsInstalling = true;
                             IsPackageInstalling = true;
                             ImportLatestPackageSDK();
                         }
