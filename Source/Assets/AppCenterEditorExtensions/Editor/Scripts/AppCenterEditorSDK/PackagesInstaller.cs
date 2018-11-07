@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 
 namespace AppCenterEditor
 {
@@ -21,14 +20,14 @@ namespace AppCenterEditor
                     {
                         foreach (var file in downloadedFiles)
                         {
-                            Debug.Log("Importing package: " + file);
+                            EdExLogger.LoggerInstance.LogWithTimeStamp("Importing package: " + file);
                             AssetDatabase.ImportPackage(file, false);
-                            Debug.Log("Deleting file: " + file);
+                            EdExLogger.LoggerInstance.LogWithTimeStamp("Deleting file: " + file);
                             FileUtil.DeleteFileOrDirectory(file);
                         }
                         AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;
                         //AppCenterEditorDataService.SaveEnvDetails();
-                        Debug.Log("App Center SDK install complete");
+                        EdExLogger.LoggerInstance.LogWithTimeStamp("App Center SDK install complete");
                     }
                     finally
                     {

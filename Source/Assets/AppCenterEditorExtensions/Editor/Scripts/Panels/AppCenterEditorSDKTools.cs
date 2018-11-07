@@ -460,6 +460,7 @@ namespace AppCenterEditor
             {
                 return;
             }
+            EdExLogger.LoggerInstance.LogWithTimeStamp("Removing SDK...");
 
             RemoveAndroidSettings();
 
@@ -468,6 +469,7 @@ namespace AppCenterEditor
                 FileUtil.DeleteFileOrDirectory(AppCenterEditorPrefsSO.Instance.SdkPath + ".meta");
                 AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnSuccess, "App Center SDK removed.");
 
+                EdExLogger.LoggerInstance.LogWithTimeStamp("App Center SDK removed.");
                 // HACK for 5.4, AssetDatabase.Refresh(); seems to cause the install to fail.
                 if (prompt)
                 {
@@ -529,7 +531,7 @@ namespace AppCenterEditor
                     // For this failure, silently skip this assembly unless we have some expectation that it contains App Center
                     if (assembly.FullName.StartsWith("Assembly-CSharp")) // The standard "source-code in unity proj" assembly name
                     {
-                        Debug.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
+                        EdExLogger.LoggerInstance.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
                     }
                     continue;
                 }
