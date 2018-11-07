@@ -112,23 +112,19 @@ namespace AppCenterEditor
         private void OnGuiInternal()
         {
             GUI.skin = AppCenterEditorHelper.uiStyle;
-
             using (new AppCenterGuiFieldHelper.UnityVertical())
             {
                 GUI.enabled = blockingRequests.Count == 0 && !EditorApplication.isCompiling;
-
-                //Run all updaters prior to drawing;
                 AppCenterEditorHeader.DrawHeader();
-
                 AppCenterEditorMenu.DrawMenu();
-
                 AppCenterEditorSDKTools.DrawSdkPanel();
-
+                foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                {
+                    AppCenterEditorSDKTools.DisplayPackagePanel(package);
+                }
                 DisplayEditorExtensionHelpMenu();
             }
-
             PruneBlockingRequests();
-
             Repaint();
         }
 
@@ -268,7 +264,7 @@ namespace AppCenterEditor
             {
                 AppCenterEditorHttp.MakeGitHubApiCall("https://api.github.com/repos/Microsoft/AppCenter-SDK-Unity-Extension/git/refs/tags", (version) =>
                 {
-                    latestEdExVersion = version ?? "Unknown";
+                    latestEdExVersion = version ?? Constants.UnknownVersion;
                     AppCenterEditorPrefsSO.Instance.EdSet_latestEdExVersion = latestEdExVersion;
                 });
             }
@@ -280,10 +276,10 @@ namespace AppCenterEditor
 
         private static bool ShowEdExUpgrade()
         {
-            if (string.IsNullOrEmpty(latestEdExVersion) || latestEdExVersion == "Unknown")
+            if (string.IsNullOrEmpty(latestEdExVersion) || latestEdExVersion == Constants.UnknownVersion)
                 return false;
 
-            if (string.IsNullOrEmpty(AppCenterEditorHelper.EDEX_VERSION) || AppCenterEditorHelper.EDEX_VERSION == "Unknown")
+            if (string.IsNullOrEmpty(AppCenterEditorHelper.EDEX_VERSION) || AppCenterEditorHelper.EDEX_VERSION == Constants.UnknownVersion)
                 return true;
 
             string[] currrent = AppCenterEditorHelper.EDEX_VERSION.Split('.');

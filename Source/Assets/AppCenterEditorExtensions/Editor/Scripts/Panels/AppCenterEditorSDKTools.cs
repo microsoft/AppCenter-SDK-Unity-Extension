@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -10,24 +10,60 @@ namespace AppCenterEditor
 {
     public class AppCenterEditorSDKTools : Editor
     {
-        public static bool IsInstalled { get { return GetAppCenterSettings() != null; } }
+        private enum SDKState
+        {
+            SDKNotInstalled, 
+            SDKNotInstalledAndInstalling,
+            SDKNotFull,
+            SDKNotFullAndInstalling,
+            SDKIsFull
+        }
+        public static bool IsInstalled { get { return AreSomePackagesInstalled(); } }
+        public static bool IsFullSDK { get { return CheckIfAllPackagesInstalled(); } }
+        public static bool IsInstalling { get; set; }
+        public static bool IsUpgrading { get; set; }
+        public static string LatestSdkVersion { get; private set; }
+        public static UnityEngine.Object SdkFolder { get; private set; }
+        public static string InstalledSdkVersion { get; private set; }
+        public static GUIStyle TitleStyle { get { return new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel")); } }
 
-        private const string AnalyticsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterAnalytics-v{0}.unitypackage";
-        private const string CrashesDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterCrashes-v{0}.unitypackage";
-        private const string DistributeDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity/releases/download/{0}/AppCenterDistribute-v{0}.unitypackage";
-        private const string AnalyticsLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterAnalyticsLatest.unitypackage";
-        private const string CrashesLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterCrashesLatest.unitypackage";
-        private const string DistributeLatestDownload = "https://mobilecentersdkdev.blob.core.windows.net/sdk/AppCenterDistributeLatest.unitypackage";
         private static Type appCenterSettingsType = null;
-        private static bool isInitialized; //used to check once, gets reset after each compile;
-        private static string installedSdkVersion = string.Empty;
-        private static string latestSdkVersion = string.Empty;
-        private static UnityEngine.Object sdkFolder;
+        private static bool isInitialized; // used to check once, gets reset after each compile
         private static UnityEngine.Object _previousSdkFolderPath;
-        private static bool isObjectFieldActive;
+        private static bool sdkFolderNotFound;
         public static bool isSdkSupported = true;
-        private static bool isInstalling = false;
         private static int angle = 0;
+
+        private static SDKState GetSDKState()
+        {
+            if (!IsInstalled)
+            {
+                if (IsInstalling)
+                {
+                    return SDKState.SDKNotInstalledAndInstalling;
+                }
+                else
+                {
+                    return SDKState.SDKNotInstalled;
+                }
+            }
+
+            //SDK installed.
+            if (IsFullSDK)
+            {
+                return SDKState.SDKIsFull;
+            }
+
+            //SDK is not full.
+            if (IsInstalling)
+            {
+                return SDKState.SDKNotFullAndInstalling;
+            }
+            else
+            {
+                return SDKState.SDKNotFull;
+            }
+        }
 
         public static void DrawSdkPanel()
         {
@@ -37,102 +73,119 @@ namespace AppCenterEditor
                 CheckSdkVersion();
                 isInitialized = true;
                 GetLatestSdkVersion();
-                sdkFolder = FindSdkAsset();
+                SdkFolder = FindSdkAsset();
 
-                if (sdkFolder != null)
+                if (SdkFolder != null)
                 {
-                    AppCenterEditorPrefsSO.Instance.SdkPath = AssetDatabase.GetAssetPath(sdkFolder);
+                    AppCenterEditorPrefsSO.Instance.SdkPath = AssetDatabase.GetAssetPath(SdkFolder);
                     // AppCenterEditorDataService.SaveEnvDetails();
                 }
             }
-
-            if (IsInstalled)
-            {
-                ShowSdkInstalledMenu();
-            }
-            else
-            {
-                ShowSdkNotInstalledMenu();
-            }
+            ShowSdkInstallationPanel();
         }
 
-        private static void ShowSdkInstalledMenu()
+        public static void DisplayPackagePanel(AppCenterSDKPackage sdkPackage)
         {
-            isObjectFieldActive = sdkFolder == null;
-
-            if (_previousSdkFolderPath != sdkFolder)
-            {
-                // something changed, better save the result.
-                _previousSdkFolderPath = sdkFolder;
-
-                AppCenterEditorPrefsSO.Instance.SdkPath = (AssetDatabase.GetAssetPath(sdkFolder));
-                //TODO: check if we need this?
-                // AppCenterEditorDataService.SaveEnvDetails();
-
-                isObjectFieldActive = false;
-            }
-
-            var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
             using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
             {
-                EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(installedSdkVersion) ? "Unknown" : installedSdkVersion),
-                    labelStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
-
-                if (!isObjectFieldActive)
-                {
-                    GUI.enabled = false;
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(
-                        "An SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
-                        AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
-                }
-
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                 {
                     GUILayout.FlexibleSpace();
-                    sdkFolder = EditorGUILayout.ObjectField(sdkFolder, typeof(UnityEngine.Object), false, GUILayout.MaxWidth(200));
+                    if (sdkPackage.IsInstalled)
+                    {
+                        sdkPackage.ShowPackageInstalledMenu();
+                    }
+                    else
+                    {
+                        sdkPackage.ShowPackageNotInstalledMenu();
+                    }
                     GUILayout.FlexibleSpace();
                 }
+            }
+        }
 
-                if (!isObjectFieldActive)
+        private static void ShowSdkInstallationPanel()
+        {
+            sdkFolderNotFound = SdkFolder == null;
+
+            if (_previousSdkFolderPath != SdkFolder)
+            {
+                // something changed, better save the result.
+                _previousSdkFolderPath = SdkFolder;
+
+                AppCenterEditorPrefsSO.Instance.SdkPath = (AssetDatabase.GetAssetPath(SdkFolder));
+                //TODO: check if we need this?
+                // AppCenterEditorDataService.SaveEnvDetails();
+
+                sdkFolderNotFound = false;
+            }
+            SDKState SDKstate = GetSDKState();
+            using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+            {
+                switch (SDKstate)
                 {
-                    // this is a hack to prevent our "block while loading technique" from breaking up at this point.
-                    GUI.enabled = !EditorApplication.isCompiling && AppCenterEditor.blockingRequests.Count == 0;
-                }
-
-                if (isSdkSupported && sdkFolder != null)
-                {
-                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
-                    {
-                        GUILayout.FlexibleSpace();
-
-                        if (GUILayout.Button("REMOVE SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
+                    case SDKState.SDKNotInstalled:
                         {
-                            RemoveSdk();
+                            ShowNOSDKLabel();
+                            ShowInstallButton();
+                            break;
                         }
-
-                        GUILayout.FlexibleSpace();
-                    }
+                    case SDKState.SDKNotInstalledAndInstalling:
+                        {
+                            ShowNOSDKLabel();
+                            ShowInstallingButton();
+                            break;
+                        }
+                    case SDKState.SDKNotFull:
+                        {
+                            ShowSdkInstalledLabel();
+                            ShowFolderObject();
+                            ShowInstallButton();
+                            ShowRemoveButton();
+                            break;
+                        }
+                    case SDKState.SDKNotFullAndInstalling:
+                        {
+                            ShowSdkInstalledLabel();
+                            ShowFolderObject();
+                            ShowInstallingButton();
+                            ShowRemoveButton();
+                            break;
+                        }
+                    case SDKState.SDKIsFull:
+                        {
+                            ShowSdkInstalledLabel();
+                            ShowFolderObject();
+                            ShowRemoveButton();
+                            break;
+                        }
                 }
             }
+            if (SDKstate == SDKState.SDKIsFull || SDKstate == SDKState.SDKNotFull)
+            {
+                ShowUpgradePanel();
+            }
+        }
 
-            if (sdkFolder != null)
+        private static void ShowUpgradePanel()
+        {
+            if (!sdkFolderNotFound)
             {
                 using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
                 {
                     isSdkSupported = false;
-                    string[] versionNumber = !string.IsNullOrEmpty(installedSdkVersion) ? installedSdkVersion.Split('.') : new string[0];
+                    string[] versionNumber = !string.IsNullOrEmpty(InstalledSdkVersion) ? InstalledSdkVersion.Split('.') : new string[0];
 
                     var numerical = 0;
-                    if (string.IsNullOrEmpty(installedSdkVersion) || versionNumber == null || versionNumber.Length == 0 ||
-                        (versionNumber.Length > 0 && int.TryParse(versionNumber[0], out numerical) && numerical < 0))
+                    bool isEmptyVersion = string.IsNullOrEmpty(InstalledSdkVersion) || versionNumber == null || versionNumber.Length == 0;
+                    if (isEmptyVersion || (versionNumber.Length > 0 && int.TryParse(versionNumber[0], out numerical) && numerical < 0))
                     {
                         //older version of the SDK
                         using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                         {
+                            GUILayout.FlexibleSpace();
                             EditorGUILayout.LabelField("SDK is outdated. Consider upgrading to the get most features.", AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
+                            GUILayout.FlexibleSpace();
                         }
                     }
                     else if (numerical >= 0)
@@ -140,136 +193,191 @@ namespace AppCenterEditor
                         isSdkSupported = true;
                     }
 
-                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
+                    var buttonWidth = 200;
+                    if (ShowSDKUpgrade() && isSdkSupported)
                     {
-                        var buttonWidth = 200;
-
-                        if (ShowSDKUpgrade() && isSdkSupported)
+                        if (IsUpgrading)
                         {
-                            GUILayout.FlexibleSpace();
-                            if (isInstalling)
+                            GUILayout.Space(10);
+                            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                             {
+                                GUILayout.FlexibleSpace();
                                 GUI.enabled = false;
                                 var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
-                                GUILayout.Button(new GUIContent("  Upgrading to " + latestSdkVersion, image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
+                                GUILayout.Button(new GUIContent("  Upgrading to " + LatestSdkVersion, image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
+                                GUILayout.FlexibleSpace();
                             }
-                            else
+                        }
+                        else
+                        {
+                            GUILayout.Space(10);
+                            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                             {
-                                if (GUILayout.Button("Upgrade to " + latestSdkVersion, AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MinHeight(32)))
+                                GUILayout.FlexibleSpace();
+                                if (GUILayout.Button("Upgrade to " + LatestSdkVersion, AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MinHeight(32)))
                                 {
-                                    isInstalling = true;
+                                    IsUpgrading = true;
                                     UpgradeSdk();
                                 }
+                                GUILayout.FlexibleSpace();
                             }
-                            GUILayout.FlexibleSpace();
                         }
-                        else if (isSdkSupported)
+                    }
+                    else if (isSdkSupported)
+                    {
+                        using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                         {
                             GUILayout.FlexibleSpace();
-                            EditorGUILayout.LabelField("You have the latest SDK!", labelStyle, GUILayout.MinHeight(32));
+                            EditorGUILayout.LabelField("You have the latest SDK!", TitleStyle, GUILayout.MinHeight(32));
                             GUILayout.FlexibleSpace();
                         }
                     }
+
+                    using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("VIEW RELEASE NOTES", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
+                        {
+                            Application.OpenURL("https://github.com/Microsoft/AppCenter-SDK-Unity/releases");
+                        }
+                        GUILayout.FlexibleSpace();
+                    }
                 }
             }
+        }
 
+        private static void ShowRemoveButton()
+        {
+            if (isSdkSupported && !sdkFolderNotFound)
+            {
+                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
+                {
+                    GUILayout.FlexibleSpace();
+
+                    if (GUILayout.Button("REMOVE SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
+                    {
+                        if (IsUpgrading)
+                        {
+                            GUI.enabled = false;
+                        }
+                        RemoveSdk();
+                    }
+
+                    GUILayout.FlexibleSpace();
+                }
+            }
+        }
+
+        private static void ShowFolderObject()
+        {
+            if (!sdkFolderNotFound)
+            {
+                GUI.enabled = false;
+            }
+            else
+            {
+                EditorGUILayout.LabelField(
+                    "An SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
+                    AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
+            }
+
+            GUILayout.Space(10);
+            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClearWithleftPad")))
+            {
+                GUILayout.FlexibleSpace();
+                SdkFolder = EditorGUILayout.ObjectField(SdkFolder, typeof(UnityEngine.Object), false, GUILayout.MaxWidth(200));
+                GUILayout.FlexibleSpace();
+            }
+
+            if (!sdkFolderNotFound)
+            {
+                // this is a hack to prevent our "block while loading technique" from breaking up at this point.
+                GUI.enabled = !EditorApplication.isCompiling && AppCenterEditor.blockingRequests.Count == 0;
+            }
+        }
+
+        private static void ShowSdkInstalledLabel()
+        {
+            EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
+                       TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+        }
+
+        private static void ShowInstallingButton()
+        {
+            var buttonWidth = 250;
             using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
             {
                 GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("VIEW RELEASE NOTES", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
-                {
-                    Application.OpenURL("https://github.com/Microsoft/AppCenter-SDK-Unity/releases");
-                }
-
+                GUI.enabled = false;
+                var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
+                GUILayout.Button(new GUIContent("  SDK is installing", image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
                 GUILayout.FlexibleSpace();
             }
         }
 
-        private static void ShowSdkNotInstalledMenu()
+        private static void ShowInstallButton()
         {
-            using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+            var buttonWidth = 250;
+            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
             {
-                var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("titleLabel"));
-
-                EditorGUILayout.LabelField("No SDK is installed.", labelStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
-                GUILayout.Space(20);
-
-                using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+                GUILayout.FlexibleSpace();
+                if (IsUpgrading)
                 {
-                    var buttonWidth = 200;
-
-                    GUILayout.FlexibleSpace();
-                    if (isInstalling)
-                    {
-                        GUI.enabled = false;
-                        var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
-                        GUILayout.Button(new GUIContent("  SDK is installing", image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
-                    }
-                    else
-                    {
-                        if (GUILayout.Button("Install App Center SDK", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
-                        {
-                            isInstalling = true;
-                            ImportLatestSDK();
-                        }
-                    }
-                    GUILayout.FlexibleSpace();
+                    GUI.enabled = false;
                 }
+                if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
+                {
+                    IsInstalling = true;
+                    ImportLatestSDK();
+                }
+                GUILayout.FlexibleSpace();
             }
+        }
+
+        private static void ShowNOSDKLabel()
+        {
+            EditorGUILayout.LabelField("No SDK is installed.", TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+            GUILayout.Space(10);
         }
 
         public static void ImportLatestSDK(string existingSdkPath = null)
         {
-            try
+            PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion, existingSdkPath);
+        }
+
+        public static bool AreSomePackagesInstalled()
+        {
+            return GetAppCenterSettings() != null;
+        }
+
+        public static List<AppCenterSDKPackage> GetNotInstalledPackages()
+        {
+            List<AppCenterSDKPackage> notInstalledPackages = new List<AppCenterSDKPackage>();
+            if (!IsInstalled)
             {
-                string[] downloadUrls = null;
-                if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
-                {
-                    Debug.Log("Downloading latest SDK version");
-                    downloadUrls = new[]
-                    {
-                        AnalyticsLatestDownload,
-                        CrashesLatestDownload,
-                        DistributeLatestDownload
-                    };
-                }
-                else
-                {
-                    Debug.Log("Downloading latest SDK version: " + latestSdkVersion);
-                    downloadUrls = new[]
-                    {
-                        string.Format(AnalyticsDownloadFormat, latestSdkVersion),
-                        string.Format(CrashesDownloadFormat, latestSdkVersion),
-                        string.Format(DistributeDownloadFormat, latestSdkVersion)
-                    };
-                }
-                AppCenterEditorHttp.MakeDownloadCall(downloadUrls, downloadedFiles =>
-                {
-                    try
-                    {
-                        foreach (var file in downloadedFiles)
-                        {
-                            Debug.Log("Importing package: " + file);
-                            AssetDatabase.ImportPackage(file, false);
-                            Debug.Log("Deleteing file: " + file);
-                            FileUtil.DeleteFileOrDirectory(file);
-                        }
-                        AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;
-                        //AppCenterEditorDataService.SaveEnvDetails();
-                        Debug.Log("App Center SDK install complete");
-                    }
-                    finally
-                    {
-                        isInstalling = false;
-                    }
-                });
+                notInstalledPackages.AddRange(AppCenterSDKPackage.SupportedPackages);
+                return notInstalledPackages;
             }
-            catch
+            foreach (var package in AppCenterSDKPackage.SupportedPackages)
             {
-                isInstalling = false;
-                throw;
+                if (!package.IsInstalled)
+                {
+                    notInstalledPackages.Add(package);
+                }
             }
+            return notInstalledPackages;
+        }
+
+        public static bool CheckIfAllPackagesInstalled()
+        {
+            foreach (var package in AppCenterSDKPackage.SupportedPackages)
+            {
+                if (!package.IsInstalled)
+                {
+                    return false;
+                }
+            }
+            return GetAppCenterSettings() != null;
         }
 
         public static Type GetAppCenterSettings()
@@ -294,30 +402,32 @@ namespace AppCenterEditor
 
         private static bool ShowSDKUpgrade()
         {
-            if (string.IsNullOrEmpty(latestSdkVersion) || latestSdkVersion == "Unknown")
+            if (string.IsNullOrEmpty(LatestSdkVersion) || LatestSdkVersion == Constants.UnknownVersion)
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(installedSdkVersion) || installedSdkVersion == "Unknown")
+            if (string.IsNullOrEmpty(InstalledSdkVersion) || InstalledSdkVersion == Constants.UnknownVersion)
             {
                 return true;
             }
 
-            string[] currrent = installedSdkVersion.Split('.');
-            string[] latest = latestSdkVersion.Split('.');
+            string[] current = InstalledSdkVersion.Split('.');
+            string[] latest = LatestSdkVersion.Split('.');
 
-            return int.Parse(latest[0]) > int.Parse(currrent[0])
-                || int.Parse(latest[1]) > int.Parse(currrent[1])
-                || int.Parse(latest[2]) > int.Parse(currrent[2]);
+            return int.Parse(latest[0]) > int.Parse(current[0])
+                || int.Parse(latest[1]) > int.Parse(current[1])
+                || int.Parse(latest[2]) > int.Parse(current[2]);
         }
 
         private static void UpgradeSdk()
         {
             if (EditorUtility.DisplayDialog("Confirm SDK Upgrade", "This action will remove the current App Center SDK and install the lastet version.", "Confirm", "Cancel"))
             {
+                IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
                 RemoveSdkBeforeUpdate();
-                ImportLatestSDK(AppCenterEditorPrefsSO.Instance.SdkPath);
+                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion);
+               // ImportLatestSDK(AppCenterEditorPrefsSO.Instance.SdkPath);
             }
         }
 
@@ -344,7 +454,7 @@ namespace AppCenterEditor
             }
         }
 
-        private static void RemoveSdk(bool prompt = true)
+        public static void RemoveSdk(bool prompt = true)
         {
             if (prompt && !EditorUtility.DisplayDialog("Confirm SDK Removal", "This action will remove the current App Center SDK.", "Confirm", "Cancel"))
             {
@@ -384,36 +494,44 @@ namespace AppCenterEditor
 
         private static void CheckSdkVersion()
         {
-            if (!string.IsNullOrEmpty(installedSdkVersion))
+            if (!string.IsNullOrEmpty(InstalledSdkVersion))
                 return;
 
-            var types = new List<Type>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
                     foreach (var type in assembly.GetTypes())
-                        if (type.Name == AppCenterEditorHelper.APPCENTER_WRAPPER_SDK_TYPENAME)
-                            types.Add(type);
+                    {
+                        if (type.FullName == "Microsoft.AppCenter.Unity.WrapperSdk")
+                        {
+                            foreach (var field in type.GetFields())
+                            {
+                                if (field.Name == "WrapperSdkVersion")
+                                {
+                                    InstalledSdkVersion = field.GetValue(field).ToString();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                        {
+                            package.CheckIfInstalled(type);
+                        }
+                    }
                 }
                 catch (ReflectionTypeLoadException)
                 {
                     // For this failure, silently skip this assembly unless we have some expectation that it contains App Center
                     if (assembly.FullName.StartsWith("Assembly-CSharp")) // The standard "source-code in unity proj" assembly name
-                        Debug.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
-                    continue;
-                }
-            }
-
-            foreach (var type in types)
-            {
-                foreach (var field in type.GetFields())
-                {
-                    if (field.Name == "WrapperSdkVersion")
                     {
-                        installedSdkVersion = field.GetValue(field).ToString();
-                        break;
+                        Debug.LogWarning("App Center Editor Extension error, failed to access the main CSharp assembly that probably contains App Center SDK");
                     }
+                    continue;
                 }
             }
         }
@@ -426,13 +544,13 @@ namespace AppCenterEditor
             {
                 AppCenterEditorHttp.MakeGitHubApiCall("https://api.github.com/repos/Microsoft/AppCenter-SDK-Unity/git/refs/tags", (version) =>
                 {
-                    latestSdkVersion = version ?? "Unknown";
-                    AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = latestSdkVersion;
+                    LatestSdkVersion = version ?? Constants.UnknownVersion;
+                    AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = LatestSdkVersion;
                 });
             }
             else
             {
-                latestSdkVersion = AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion;
+                LatestSdkVersion = AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion;
             }
         }
 
