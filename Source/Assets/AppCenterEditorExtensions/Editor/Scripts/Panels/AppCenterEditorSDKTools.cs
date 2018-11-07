@@ -283,7 +283,7 @@ namespace AppCenterEditor
         {
             GUILayout.Space(5);
             EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
-                       TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+                TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
             GUILayout.Space(5);
         }
 
@@ -405,7 +405,7 @@ namespace AppCenterEditor
             {
                 IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
                 RemoveSdkBeforeUpdate();
-                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion);
+                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
             }
         }
 
