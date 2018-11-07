@@ -18,7 +18,7 @@ namespace AppCenterEditor
         };
 
         public string InstalledVersion { get; private set; }
-        public bool IsInstalled { get; private set; }
+        public bool IsInstalled { get; set; }
         public bool IsPackageInstalling { get; set; }
         public bool IsObjectFieldActive { get; set; }
         protected abstract bool IsSupportedForWSA { get; }
@@ -121,7 +121,7 @@ namespace AppCenterEditor
                 {
                     GUILayout.FlexibleSpace();
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, sdkPackageVersion), labelStyle);                    
+                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, sdkPackageVersion), labelStyle);
                     GUILayout.FlexibleSpace();
                 }
 
@@ -199,23 +199,19 @@ namespace AppCenterEditor
             }
         }
 
-        public void CheckIfInstalled(Type type)
+        public void GetInstalledVersion(Type type, string coreVersion)
         {
-            if (type.FullName == TypeName)
+            foreach (var field in type.GetFields())
             {
-                IsInstalled = true;
-                foreach (var field in type.GetFields())
+                if (field.Name == VersionFieldName)
                 {
-                    if (field.Name == VersionFieldName)
-                    {
-                        InstalledVersion = field.GetValue(field).ToString();
-                        break;
-                    }
+                    InstalledVersion = field.GetValue(field).ToString();
+                    break;
                 }
-                if (string.IsNullOrEmpty(InstalledVersion))
-                {
-                    InstalledVersion = string.IsNullOrEmpty(AppCenterEditorSDKTools.InstalledSdkVersion) ? Constants.UnknownVersion : AppCenterEditorSDKTools.InstalledSdkVersion;
-                }
+            }
+            if (string.IsNullOrEmpty(InstalledVersion))
+            {
+                InstalledVersion = string.IsNullOrEmpty(coreVersion) ? Constants.UnknownVersion : coreVersion;
             }
         }
 
