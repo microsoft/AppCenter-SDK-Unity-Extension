@@ -122,6 +122,11 @@ namespace AppCenterEditor
                 {
                     AppCenterEditorSDKTools.DisplayPackagePanel(package);
                 }
+                AppCenterEditorSDKTools.SDKState state = AppCenterEditorSDKTools.GetSDKState();
+                if (state == AppCenterEditorSDKTools.SDKState.SDKIsFull || state == AppCenterEditorSDKTools.SDKState.SDKNotFull)
+                {
+                    AppCenterEditorSDKTools.ShowUpgradePanel();
+                }
                 DisplayEditorExtensionHelpMenu();
             }
             PruneBlockingRequests();

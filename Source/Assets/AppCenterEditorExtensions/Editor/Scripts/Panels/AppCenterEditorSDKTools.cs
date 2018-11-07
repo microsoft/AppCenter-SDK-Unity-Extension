@@ -161,13 +161,9 @@ namespace AppCenterEditor
                         }
                 }
             }
-            if (SDKstate == SDKState.SDKIsFull || SDKstate == SDKState.SDKNotFull)
-            {
-                ShowUpgradePanel();
-            }
         }
 
-        private static void ShowUpgradePanel()
+        public static void ShowUpgradePanel()
         {
             if (!sdkFolderNotFound)
             {
