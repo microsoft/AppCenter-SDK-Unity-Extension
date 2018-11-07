@@ -10,7 +10,7 @@ namespace AppCenterEditor
 {
     public class AppCenterEditorSDKTools : Editor
     {
-        private enum SDKState
+        public enum SDKState
         {
             SDKNotInstalled, 
             SDKNotInstalledAndInstalling,
@@ -34,7 +34,7 @@ namespace AppCenterEditor
         public static bool isSdkSupported = true;
         private static int angle = 0;
 
-        private static SDKState GetSDKState()
+        public static SDKState GetSDKState()
         {
             if (!IsInstalled)
             {
@@ -194,15 +194,15 @@ namespace AppCenterEditor
                     }
 
                     var buttonWidth = 200;
+
+                    GUILayout.Space(5);
                     if (ShowSDKUpgrade() && isSdkSupported)
                     {
                         if (IsUpgrading)
                         {
-                            GUILayout.Space(10);
                             using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                             {
                                 GUILayout.FlexibleSpace();
-                                GUI.enabled = false;
                                 var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
                                 GUILayout.Button(new GUIContent("  Upgrading to " + LatestSdkVersion, image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
                                 GUILayout.FlexibleSpace();
@@ -210,7 +210,6 @@ namespace AppCenterEditor
                         }
                         else
                         {
-                            GUILayout.Space(10);
                             using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                             {
                                 GUILayout.FlexibleSpace();
@@ -232,6 +231,7 @@ namespace AppCenterEditor
                             GUILayout.FlexibleSpace();
                         }
                     }
+                    GUILayout.Space(5);
 
                     using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                     {
@@ -256,10 +256,6 @@ namespace AppCenterEditor
 
                     if (GUILayout.Button("REMOVE SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton"), GUILayout.MinHeight(32), GUILayout.MinWidth(200)))
                     {
-                        if (IsUpgrading)
-                        {
-                            GUI.enabled = false;
-                        }
                         RemoveSdk();
                     }
 
@@ -270,61 +266,59 @@ namespace AppCenterEditor
 
         private static void ShowFolderObject()
         {
-            if (!sdkFolderNotFound)
-            {
-                GUI.enabled = false;
-            }
-            else
+            if (sdkFolderNotFound)
             {
                 EditorGUILayout.LabelField(
                     "An SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
                     AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
             }
+            else
+            {
+                // This hack is needed to disable folder object and remove the blue border around it.
+                // Other UI is getting enabled later in the method.
+                GUI.enabled = false;
+            }
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
             using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClearWithleftPad")))
             {
                 GUILayout.FlexibleSpace();
                 SdkFolder = EditorGUILayout.ObjectField(SdkFolder, typeof(UnityEngine.Object), false, GUILayout.MaxWidth(200));
                 GUILayout.FlexibleSpace();
             }
-
-            if (!sdkFolderNotFound)
-            {
-                // this is a hack to prevent our "block while loading technique" from breaking up at this point.
-                GUI.enabled = !EditorApplication.isCompiling && AppCenterEditor.blockingRequests.Count == 0;
-            }
+            GUILayout.Space(5);
+            GUI.enabled = AppCenterEditor.IsGUIEnabled();
         }
 
         private static void ShowSdkInstalledLabel()
         {
+            GUILayout.Space(5);
             EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
                        TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+            GUILayout.Space(5);
         }
 
         private static void ShowInstallingButton()
         {
             var buttonWidth = 250;
-            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+            GUILayout.Space(5);
+            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
             {
                 GUILayout.FlexibleSpace();
-                GUI.enabled = false;
                 var image = DrawUtils.RotateImage(AssetDatabase.LoadAssetAtPath("Assets/AppCenterEditorExtensions/Editor/UI/Images/wheel.png", typeof(Texture2D)) as Texture2D, angle++);
                 GUILayout.Button(new GUIContent("  SDK is installing", image), AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32));
                 GUILayout.FlexibleSpace();
             }
+            GUILayout.Space(5);
         }
 
         private static void ShowInstallButton()
         {
             var buttonWidth = 250;
-            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
+            GUILayout.Space(5);
+            using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleEmpty")))
             {
                 GUILayout.FlexibleSpace();
-                if (IsUpgrading)
-                {
-                    GUI.enabled = false;
-                }
                 if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                 {
                     IsInstalling = true;
@@ -332,6 +326,7 @@ namespace AppCenterEditor
                 }
                 GUILayout.FlexibleSpace();
             }
+            GUILayout.Space(5);
         }
 
         private static void ShowNOSDKLabel()
