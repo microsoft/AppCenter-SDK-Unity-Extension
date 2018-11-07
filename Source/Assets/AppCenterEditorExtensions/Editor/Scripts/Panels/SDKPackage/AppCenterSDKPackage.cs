@@ -44,7 +44,7 @@ namespace AppCenterEditor
 
         private void RemovePackage(bool prompt = true)
         {
-            EdExLogger.LogWithTimeStamp(string.Format("Deleting {0} package...", Name));
+            EdExLoggerFactory.LoggerInstance.LogWithTimeStamp(string.Format("Deleting {0} package...", Name));
             if (prompt && !EditorUtility.DisplayDialog("Confirm SDK Removal", string.Format("This action will remove the current {0} SDK.", Name), "Confirm", "Cancel"))
             {
                 return;
@@ -95,7 +95,7 @@ namespace AppCenterEditor
 
             if (deleted)
             {
-                EdExLogger.LogWithTimeStamp(string.Format("{0} package deleted.", Name));
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp(string.Format("{0} package deleted.", Name));
                 AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnSuccess, string.Format("App Center {0} SDK removed.", Name));
 
                 // HACK for 5.4, AssetDatabase.Refresh(); seems to cause the install to fail.

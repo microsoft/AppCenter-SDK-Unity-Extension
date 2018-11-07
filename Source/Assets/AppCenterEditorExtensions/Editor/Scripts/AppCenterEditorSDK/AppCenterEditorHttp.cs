@@ -12,7 +12,7 @@ namespace AppCenterEditor
     {
         internal static void MakeDownloadCall(string url, Action<string> resultCallback)
         {
-            EdExLogger.LogWithTimeStamp("Downloading file: " + url);
+            EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Downloading file: " + url);
             var www = new WWW(url);
             AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnHttpReq, url, AppCenterEditorHelper.MSG_SPIN_BLOCK);
             EditorCoroutine.Start(PostDownload(www, response =>
@@ -23,7 +23,7 @@ namespace AppCenterEditor
 
         internal static void MakeDownloadCall(IEnumerable<string> urls, Action<IEnumerable<string>> resultCallback)
         {
-            EdExLogger.LogWithTimeStamp("Downloading files: " + string.Join(", ", urls.ToArray()));
+            EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Downloading files: " + string.Join(", ", urls.ToArray()));
             var wwws = new List<WWW>();
             var downloadRequests = new List<DownloadRequest>();
             foreach (var url in urls)
@@ -140,7 +140,7 @@ namespace AppCenterEditor
             }
             var fileSaveLocation = AppCenterEditorHelper.EDEX_ROOT + fileName;
             var fileSaveDirectory = Path.GetDirectoryName(fileSaveLocation);
-            EdExLogger.Log("Saving " + response.Length + " bytes to: " + fileSaveLocation);
+            EdExLoggerFactory.LoggerInstance.Log("Saving " + response.Length + " bytes to: " + fileSaveLocation);
             if (!Directory.Exists(fileSaveDirectory))
             {
                 Directory.CreateDirectory(fileSaveDirectory);

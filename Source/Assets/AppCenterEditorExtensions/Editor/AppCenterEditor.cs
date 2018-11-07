@@ -229,12 +229,12 @@ namespace AppCenterEditor
 
                 case EdExStates.OnError:
                     ProgressBar.UpdateState(ProgressBar.ProgressBarStates.error);
-                    EdExLogger.LogError(string.Format("App Center Editor Extensions: {0}", status));
+                    EdExLoggerFactory.LoggerInstance.LogError(string.Format("App Center Editor Extensions: {0}", status));
                     break;
 
                 case EdExStates.OnWarning:
                     ProgressBar.UpdateState(ProgressBar.ProgressBarStates.warning);
-                    EdExLogger.LogWarning(string.Format("App Center Editor Extensions: {0}", status));
+                    EdExLoggerFactory.LoggerInstance.LogWarning(string.Format("App Center Editor Extensions: {0}", status));
                     break;
 
                 case EdExStates.OnSuccess:
@@ -302,10 +302,10 @@ namespace AppCenterEditor
             {
                 window.Close();
                 var edExDirectory = new DirectoryInfo(AppCenterEditorHelper.EDEX_ROOT).Parent.FullName;
-                EdExLogger.LogWithTimeStamp("Deleting directory: " + edExDirectory);
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Deleting directory: " + edExDirectory);
                 FileUtil.DeleteFileOrDirectory(edExDirectory);
                 var edExDirectoryMeta = edExDirectory + ".meta";
-                EdExLogger.LogWithTimeStamp("Deleting file: " + edExDirectoryMeta);
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Deleting file: " + edExDirectoryMeta);
                 FileUtil.DeleteFileOrDirectory(edExDirectoryMeta);
                 if (prompt)
                 {
@@ -314,7 +314,7 @@ namespace AppCenterEditor
             }
             catch (Exception ex)
             {
-                EdExLogger.LogError("Failed to remove App Center Editor Extensions: " + ex);
+                EdExLoggerFactory.LoggerInstance.LogError("Failed to remove App Center Editor Extensions: " + ex);
             }
         }
 
@@ -332,11 +332,11 @@ namespace AppCenterEditor
             var downloadUrl = string.Format(EditorExtensionsDownloadFormat, latestEdExVersion);
             AppCenterEditorHttp.MakeDownloadCall(downloadUrl, file =>
             {
-                EdExLogger.LogWithTimeStamp("Importing package: " + file);
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Importing package: " + file);
                 AssetDatabase.ImportPackage(file, false);
-                EdExLogger.LogWithTimeStamp("Deleteing file: " + file);
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Deleteing file: " + file);
                 FileUtil.DeleteFileOrDirectory(file);
-                EdExLogger.LogWithTimeStamp("App Center Editor Extensions upgrade complete");
+                EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("App Center Editor Extensions upgrade complete");
             });
         }
     }
