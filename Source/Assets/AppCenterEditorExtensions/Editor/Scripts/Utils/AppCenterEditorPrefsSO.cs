@@ -44,7 +44,7 @@ namespace AppCenterEditor
                     Directory.CreateDirectory(Path.Combine(Application.dataPath, "AppCenterEditorExtensions/Editor/Resources"));
                 AssetDatabase.CreateAsset(_instance, "Assets/AppCenterEditorExtensions/Editor/Resources/AppCenterEditorPrefsSO.asset");
                 AssetDatabase.SaveAssets();
-                EdExLoggerFactory.LoggerInstance.LogWarning("Created missing AppCenterEditorPrefsSO file");
+                EdExLogger.LoggerInstance.LogWarning("Created missing AppCenterEditorPrefsSO file");
                 return _instance;
             }
         }

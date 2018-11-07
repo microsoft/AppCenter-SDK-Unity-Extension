@@ -20,14 +20,14 @@ namespace AppCenterEditor
                     {
                         foreach (var file in downloadedFiles)
                         {
-                            EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Importing package: " + file);
+                            EdExLogger.LoggerInstance.LogWithTimeStamp("Importing package: " + file);
                             AssetDatabase.ImportPackage(file, false);
-                            EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("Deleting file: " + file);
+                            EdExLogger.LoggerInstance.LogWithTimeStamp("Deleting file: " + file);
                             FileUtil.DeleteFileOrDirectory(file);
                         }
                         AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;
                         //AppCenterEditorDataService.SaveEnvDetails();
-                        EdExLoggerFactory.LoggerInstance.LogWithTimeStamp("App Center SDK install complete");
+                        EdExLogger.LoggerInstance.LogWithTimeStamp("App Center SDK install complete");
                     }
                     finally
                     {

@@ -2,7 +2,7 @@
 //Factory.
 namespace AppCenterEditor
 {
-    class EdExLoggerFactory
+    class EdExLogger
     {
         private static IEdExLogger _instance;
 
@@ -14,11 +14,11 @@ namespace AppCenterEditor
                 {
                     _instance = new LocalLogger();
                 }
-                return _instance;                    
+                return _instance;
             }
         }
 
-        private EdExLoggerFactory()
+        private EdExLogger()
         {
         }        
     }
