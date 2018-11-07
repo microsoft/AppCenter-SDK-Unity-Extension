@@ -114,7 +114,7 @@ namespace AppCenterEditor
             GUI.skin = AppCenterEditorHelper.uiStyle;
             using (new AppCenterGuiFieldHelper.UnityVertical())
             {
-                GUI.enabled = blockingRequests.Count == 0 && !EditorApplication.isCompiling;
+                GUI.enabled = IsGUIEnabled();
                 AppCenterEditorHeader.DrawHeader();
                 AppCenterEditorMenu.DrawMenu();
                 AppCenterEditorSDKTools.DrawSdkPanel();
@@ -122,10 +122,28 @@ namespace AppCenterEditor
                 {
                     AppCenterEditorSDKTools.DisplayPackagePanel(package);
                 }
+                AppCenterEditorSDKTools.SDKState state = AppCenterEditorSDKTools.GetSDKState();
+                if (state == AppCenterEditorSDKTools.SDKState.SDKIsFull || state == AppCenterEditorSDKTools.SDKState.SDKNotFull)
+                {
+                    AppCenterEditorSDKTools.ShowUpgradePanel();
+                }
                 DisplayEditorExtensionHelpMenu();
             }
             PruneBlockingRequests();
             Repaint();
+        }
+
+        public static bool IsGUIEnabled()
+        {
+            if (blockingRequests.Count > 0 || EditorApplication.isCompiling)
+            {
+                return false;
+            }
+            AppCenterEditorSDKTools.SDKState state = AppCenterEditorSDKTools.GetSDKState();
+            return 
+                !AppCenterEditorSDKTools.IsUpgrading && 
+                state != AppCenterEditorSDKTools.SDKState.SDKNotFullAndInstalling && 
+                state != AppCenterEditorSDKTools.SDKState.SDKNotInstalledAndInstalling;
         }
 
         private static void DisplayEditorExtensionHelpMenu()
