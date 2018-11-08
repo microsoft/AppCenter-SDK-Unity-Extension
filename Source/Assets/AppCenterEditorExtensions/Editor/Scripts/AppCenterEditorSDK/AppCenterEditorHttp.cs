@@ -140,7 +140,7 @@ namespace AppCenterEditor
             }
             var fileSaveLocation = AppCenterEditorHelper.EDEX_ROOT + fileName;
             var fileSaveDirectory = Path.GetDirectoryName(fileSaveLocation);
-            EdExLogger.LoggerInstance.Log("Saving " + response.Length + " bytes to: " + fileSaveLocation);
+            EdExLogger.LoggerInstance.LogWithTimeStamp("Saving " + response.Length + " bytes to: " + fileSaveLocation);
             if (!Directory.Exists(fileSaveDirectory))
             {
                 Directory.CreateDirectory(fileSaveDirectory);
