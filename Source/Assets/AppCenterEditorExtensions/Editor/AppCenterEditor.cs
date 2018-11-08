@@ -65,7 +65,7 @@ namespace AppCenterEditor
             }
 
             window = GetWindow<AppCenterEditor>(inspWndType);
-            window.titleContent = new GUIContent("AppCenter EdEx");
+            window.titleContent = new GUIContent("App Center");
             AppCenterEditorPrefsSO.Instance.PanelIsShown = true;
         }
 
@@ -140,9 +140,9 @@ namespace AppCenterEditor
                 return false;
             }
             AppCenterEditorSDKTools.SDKState state = AppCenterEditorSDKTools.GetSDKState();
-            return 
-                !AppCenterEditorSDKTools.IsUpgrading && 
-                state != AppCenterEditorSDKTools.SDKState.SDKNotFullAndInstalling && 
+            return
+                !AppCenterEditorSDKTools.IsUpgrading &&
+                state != AppCenterEditorSDKTools.SDKState.SDKNotFullAndInstalling &&
                 state != AppCenterEditorSDKTools.SDKState.SDKNotInstalledAndInstalling;
         }
 
