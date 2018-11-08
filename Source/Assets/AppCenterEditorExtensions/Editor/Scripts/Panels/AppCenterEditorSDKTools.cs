@@ -477,11 +477,11 @@ namespace AppCenterEditor
             if (!string.IsNullOrEmpty(InstalledSdkVersion))
                 return;
 
+            var packageTypes = new Dictionary<AppCenterSDKPackage, Type>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
-                    var packageTypes = new Dictionary<AppCenterSDKPackage, Type>();
                     foreach (var type in assembly.GetTypes())
                     {
                         if (type.FullName == Constants.WrapperSdkClassName)
@@ -507,10 +507,6 @@ namespace AppCenterEditor
                             }
                         }
                     }
-                    foreach (var packageType in packageTypes)
-                    {
-                        packageType.Key.GetInstalledVersion(packageType.Value, InstalledSdkVersion);
-                    }
                 }
                 catch (ReflectionTypeLoadException)
                 {
@@ -521,6 +517,10 @@ namespace AppCenterEditor
                     }
                     continue;
                 }
+            }
+            foreach (var packageType in packageTypes)
+            {
+                packageType.Key.GetInstalledVersion(packageType.Value, InstalledSdkVersion);
             }
         }
 
