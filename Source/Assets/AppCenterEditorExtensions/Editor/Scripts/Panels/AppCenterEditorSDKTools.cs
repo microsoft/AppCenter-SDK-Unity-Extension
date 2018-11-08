@@ -12,7 +12,7 @@ namespace AppCenterEditor
     {
         public enum SDKState
         {
-            SDKNotInstalled, 
+            SDKNotInstalled,
             SDKNotInstalledAndInstalling,
             SDKNotFull,
             SDKNotFullAndInstalling,
@@ -125,40 +125,34 @@ namespace AppCenterEditor
                 switch (SDKstate)
                 {
                     case SDKState.SDKNotInstalled:
-                        {
-                            ShowNOSDKLabel();
-                            ShowInstallButton();
-                            break;
-                        }
+                        ShowNOSDKLabel();
+                        ShowInstallButton();
+                        break;
+
                     case SDKState.SDKNotInstalledAndInstalling:
-                        {
-                            ShowNOSDKLabel();
-                            ShowInstallingButton();
-                            break;
-                        }
+                        ShowNOSDKLabel();
+                        ShowInstallingButton();
+                        break;
+
                     case SDKState.SDKNotFull:
-                        {
-                            ShowSdkInstalledLabel();
-                            ShowFolderObject();
-                            ShowInstallButton();
-                            ShowRemoveButton();
-                            break;
-                        }
+                        ShowSdkInstalledLabel();
+                        ShowFolderObject();
+                        ShowInstallButton();
+                        ShowRemoveButton();
+                        break;
+
                     case SDKState.SDKNotFullAndInstalling:
-                        {
-                            ShowSdkInstalledLabel();
-                            ShowFolderObject();
-                            ShowInstallingButton();
-                            ShowRemoveButton();
-                            break;
-                        }
+                        ShowSdkInstalledLabel();
+                        ShowFolderObject();
+                        ShowInstallingButton();
+                        ShowRemoveButton();
+                        break;
+
                     case SDKState.SDKIsFull:
-                        {
-                            ShowSdkInstalledLabel();
-                            ShowFolderObject();
-                            ShowRemoveButton();
-                            break;
-                        }
+                        ShowSdkInstalledLabel();
+                        ShowFolderObject();
+                        ShowRemoveButton();
+                        break;
                 }
             }
         }
@@ -264,8 +258,7 @@ namespace AppCenterEditor
         {
             if (sdkFolderNotFound)
             {
-                EditorGUILayout.LabelField(
-                    "An SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
+                EditorGUILayout.LabelField("An SDK was detected, but we were unable to find the directory. Drag-and-drop the top-level App Center SDK folder below.",
                     AppCenterEditorHelper.uiStyle.GetStyle("orTxt"));
             }
             else
@@ -290,7 +283,7 @@ namespace AppCenterEditor
         {
             GUILayout.Space(5);
             EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
-                       TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+                TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
             GUILayout.Space(5);
         }
 
@@ -318,7 +311,7 @@ namespace AppCenterEditor
                 if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                 {
                     IsInstalling = true;
-                    ImportLatestSDK();
+                    PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion);
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -329,11 +322,6 @@ namespace AppCenterEditor
         {
             EditorGUILayout.LabelField("No SDK is installed.", TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
             GUILayout.Space(10);
-        }
-
-        public static void ImportLatestSDK(string existingSdkPath = null)
-        {
-            PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion, existingSdkPath);
         }
 
         public static bool AreSomePackagesInstalled()
@@ -417,8 +405,7 @@ namespace AppCenterEditor
             {
                 IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
                 RemoveSdkBeforeUpdate();
-                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion);
-               // ImportLatestSDK(AppCenterEditorPrefsSO.Instance.SdkPath);
+                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
             }
         }
 
@@ -490,30 +477,34 @@ namespace AppCenterEditor
             if (!string.IsNullOrEmpty(InstalledSdkVersion))
                 return;
 
+            var packageTypes = new Dictionary<AppCenterSDKPackage, Type>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.FullName == "Microsoft.AppCenter.Unity.WrapperSdk")
+                        if (type.FullName == Constants.WrapperSdkClassName)
                         {
                             foreach (var field in type.GetFields())
                             {
-                                if (field.Name == "WrapperSdkVersion")
+                                if (field.Name == Constants.WrapperSdkVersionFieldName)
                                 {
                                     InstalledSdkVersion = field.GetValue(field).ToString();
                                     break;
                                 }
                             }
                         }
-                    }
-
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                        else
                         {
-                            package.CheckIfInstalled(type);
+                            foreach (var package in AppCenterSDKPackage.SupportedPackages)
+                            {
+                                if (type.FullName == package.TypeName)
+                                {
+                                    package.IsInstalled = true;
+                                    packageTypes[package] = type;
+                                }
+                            }
                         }
                     }
                 }
@@ -526,6 +517,10 @@ namespace AppCenterEditor
                     }
                     continue;
                 }
+            }
+            foreach (var packageType in packageTypes)
+            {
+                packageType.Key.GetInstalledVersion(packageType.Value, InstalledSdkVersion);
             }
         }
 
