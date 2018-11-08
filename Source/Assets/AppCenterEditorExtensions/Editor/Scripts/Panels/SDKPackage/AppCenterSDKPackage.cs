@@ -44,14 +44,13 @@ namespace AppCenterEditor
 
         private void RemovePackage(bool prompt = true)
         {
-            EdExLogger.LoggerInstance.LogWithTimeStamp(string.Format("Deleting {0} package...", Name));
             if (prompt && !EditorUtility.DisplayDialog("Confirm SDK Removal", string.Format("This action will remove the current {0} SDK.", Name), "Confirm", "Cancel"))
             {
                 return;
             }
+            EdExLogger.LoggerInstance.LogWithTimeStamp(string.Format("Deleting {0} package...", Name));
 
             var toDelete = new List<string>();
-
             string pluginsPath = Path.Combine(AppCenterEditorPrefsSO.Instance.SdkPath, "Plugins");
             string androidPath = Path.Combine(pluginsPath, "Android");
             string sdkPath = Path.Combine(pluginsPath, "AppCenterSDK");
