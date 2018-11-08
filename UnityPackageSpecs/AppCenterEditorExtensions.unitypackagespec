@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="AppCenterEditorExtensions" version="0.1.1">
+<package name="AppCenterEditorExtensions" version="1.0.0">
     <include>
         <file path="Assets/AppCenterEditorExtensions" />
     </include>
