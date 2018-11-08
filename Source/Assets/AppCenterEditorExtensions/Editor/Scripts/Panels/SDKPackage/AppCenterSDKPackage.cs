@@ -142,7 +142,7 @@ namespace AppCenterEditor
                     {
                         GUILayout.FlexibleSpace();
 
-                        if (GUILayout.Button("Remove SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta")))
+                        if (GUILayout.Button("Remove SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton")))
                         {
                             RemovePackage();
                         }
@@ -175,7 +175,7 @@ namespace AppCenterEditor
                     }
                     else
                     {
-                        if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButtonMagenta")))
+                        if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton")))
                         {
                             AppCenterEditorSDKTools.IsInstalling = true;
                             IsPackageInstalling = true;
