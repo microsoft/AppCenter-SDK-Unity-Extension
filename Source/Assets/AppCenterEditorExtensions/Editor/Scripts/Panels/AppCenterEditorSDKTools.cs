@@ -414,7 +414,9 @@ namespace AppCenterEditor
             var skippedFiles = new[]
             {
                 "AppCenterSettings.asset",
-                "AppCenterSettings.asset.meta"
+                "AppCenterSettings.asset.meta",
+                "AppCenterSettingsAdvanced.asset",
+                "AppCenterSettingsAdvanced.asset.meta"
             };
 
             RemoveAndroidSettings();
