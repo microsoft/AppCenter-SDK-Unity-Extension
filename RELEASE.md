@@ -1,4 +1,4 @@
-# Release 1.0.0
+# Release 1.1.0
 
-* **[Feature]** You can now install and remove a specific SDK package instead of installing and removing all of them at once
+* **[Feature]** App Center Unity SDK Push package support
 * Various bug fixes and improvements
