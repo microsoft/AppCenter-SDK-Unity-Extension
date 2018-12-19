@@ -121,7 +121,7 @@ namespace AppCenterEditor
                 {
                     GUILayout.FlexibleSpace();
                     var labelStyle = new GUIStyle(AppCenterEditorHelper.uiStyle.GetStyle("versionText"));
-                    EditorGUILayout.LabelField(string.Format("App Center {0} SDK {1} is installed", Name, sdkPackageVersion), labelStyle);
+                    EditorGUILayout.LabelField(string.Format("{0} SDK {1} is installed", Name, sdkPackageVersion), labelStyle);
                     GUILayout.FlexibleSpace();
                 }
 
