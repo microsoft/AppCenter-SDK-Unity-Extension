@@ -113,12 +113,12 @@ namespace AppCenterEditor
         private void OnGuiInternal()
         {
             GUI.skin = AppCenterEditorHelper.uiStyle;
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
             using (new AppCenterGuiFieldHelper.UnityVertical())
             {
                 GUI.enabled = IsGUIEnabled();
                 AppCenterEditorHeader.DrawHeader();
                 AppCenterEditorMenu.DrawMenu();
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
                 AppCenterEditorSDKTools.DrawSdkPanel();
                 foreach (var package in AppCenterSDKPackage.SupportedPackages)
                 {
@@ -130,8 +130,8 @@ namespace AppCenterEditor
                     AppCenterEditorSDKTools.ShowUpgradePanel();
                 }
                 DisplayEditorExtensionHelpMenu();
-                GUILayout.EndScrollView();
             }
+            GUILayout.EndScrollView();
             PruneBlockingRequests();
             Repaint();
         }
