@@ -1,3 +1,5 @@
 *.unitypackage
 /Source/Assets/AppCenter/
 /Source/Assets/AppCenter.meta
+/Source/Assets/PlayServicesResolver/
+/Source/Assets/PlayServicesResolver.meta

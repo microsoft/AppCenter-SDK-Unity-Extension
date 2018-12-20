@@ -9,6 +9,7 @@ namespace AppCenterEditor
 {
     public class AppCenterEditor : EditorWindow
     {
+        private Vector2 scrollPosition = Vector2.zero;
         private const string EditorExtensionsDownloadFormat = "https://github.com/Microsoft/AppCenter-SDK-Unity-Extension/releases/download/{0}/AppCenterEditorExtensions-v{0}.unitypackage";
         public enum EdExStates { OnMenuItemClicked, OnHttpReq, OnHttpRes, OnError, OnSuccess, OnWarning }
 
@@ -117,6 +118,7 @@ namespace AppCenterEditor
                 GUI.enabled = IsGUIEnabled();
                 AppCenterEditorHeader.DrawHeader();
                 AppCenterEditorMenu.DrawMenu();
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
                 AppCenterEditorSDKTools.DrawSdkPanel();
                 foreach (var package in AppCenterSDKPackage.SupportedPackages)
                 {
@@ -128,6 +130,7 @@ namespace AppCenterEditor
                     AppCenterEditorSDKTools.ShowUpgradePanel();
                 }
                 DisplayEditorExtensionHelpMenu();
+                GUILayout.EndScrollView();
             }
             PruneBlockingRequests();
             Repaint();
