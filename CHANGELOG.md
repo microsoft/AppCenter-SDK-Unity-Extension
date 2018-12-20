@@ -1,5 +1,11 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
+## Release 1.1.1
+
+* **[Feature]** Added vertical scrollbar
+
+___
+
 ## Release 1.1.0
 
 * **[Feature]** App Center Unity SDK Push package support
