@@ -283,7 +283,7 @@ namespace AppCenterEditor
         {
             GUILayout.Space(5);
             EditorGUILayout.LabelField(string.Format("SDK {0} is installed", string.IsNullOrEmpty(InstalledSdkVersion) ? Constants.UnknownVersion : InstalledSdkVersion),
-                TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+                TitleStyle, GUILayout.ExpandWidth(true));
             GUILayout.Space(5);
         }
 
@@ -320,7 +320,7 @@ namespace AppCenterEditor
 
         private static void ShowNOSDKLabel()
         {
-            EditorGUILayout.LabelField("No SDK is installed.", TitleStyle, GUILayout.MinWidth(EditorGUIUtility.currentViewWidth));
+            EditorGUILayout.LabelField("No SDK is installed.", TitleStyle, GUILayout.ExpandWidth(true));
             GUILayout.Space(10);
         }
 

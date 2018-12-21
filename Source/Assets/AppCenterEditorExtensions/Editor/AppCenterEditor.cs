@@ -21,6 +21,20 @@ namespace AppCenterEditor
 
         public static string latestEdExVersion = string.Empty;
 
+        private static Rect scrollInnerContainer;
+        public static float InnerContainerWidth
+        {
+            get
+            {
+                if (scrollInnerContainer != null)
+                {
+                    return scrollInnerContainer.width;
+                }
+
+                return EditorGUIUtility.currentViewWidth;
+            }
+        }
+
         internal static AppCenterEditor window;
 
         void OnEnable()
@@ -113,8 +127,14 @@ namespace AppCenterEditor
         private void OnGuiInternal()
         {
             GUI.skin = AppCenterEditorHelper.uiStyle;
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
-            using (new AppCenterGuiFieldHelper.UnityVertical())
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
+            scrollInnerContainer = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+            using (
+                new AppCenterGuiFieldHelper.UnityVertical(
+                    GUILayout.Width(scrollInnerContainer.width),
+                    GUILayout.MaxWidth(scrollInnerContainer.width),
+                    GUILayout.Height(scrollInnerContainer.height)
+                    ))
             {
                 GUI.enabled = IsGUIEnabled();
                 AppCenterEditorHeader.DrawHeader();
@@ -131,6 +151,7 @@ namespace AppCenterEditor
                 }
                 DisplayEditorExtensionHelpMenu();
             }
+            EditorGUILayout.EndHorizontal();
             GUILayout.EndScrollView();
             PruneBlockingRequests();
             Repaint();
