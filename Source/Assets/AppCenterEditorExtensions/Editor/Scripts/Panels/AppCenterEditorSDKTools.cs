@@ -31,7 +31,6 @@ namespace AppCenterEditor
         private static bool isInitialized; // used to check once, gets reset after each compile
         private static UnityEngine.Object _previousSdkFolderPath;
         private static bool sdkFolderNotFound;
-        public static bool isSdkSupported = true;
         private static int angle = 0;
 
         public static SDKState GetSDKState()
@@ -163,7 +162,6 @@ namespace AppCenterEditor
             {
                 using (new AppCenterGuiFieldHelper.UnityVertical(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleGray1")))
                 {
-                    isSdkSupported = false;
                     string[] versionNumber = !string.IsNullOrEmpty(InstalledSdkVersion) ? InstalledSdkVersion.Split('.') : new string[0];
 
                     var numerical = 0;
@@ -178,15 +176,11 @@ namespace AppCenterEditor
                             GUILayout.FlexibleSpace();
                         }
                     }
-                    else if (numerical >= 0)
-                    {
-                        isSdkSupported = true;
-                    }
 
                     var buttonWidth = 200;
 
                     GUILayout.Space(5);
-                    if (ShowSDKUpgrade() && isSdkSupported)
+                    if (ShowSDKUpgrade())
                     {
                         if (IsUpgrading)
                         {
@@ -212,7 +206,7 @@ namespace AppCenterEditor
                             }
                         }
                     }
-                    else if (isSdkSupported)
+                    else
                     {
                         using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                         {
@@ -238,7 +232,7 @@ namespace AppCenterEditor
 
         private static void ShowRemoveButton()
         {
-            if (isSdkSupported && !sdkFolderNotFound)
+            if (!sdkFolderNotFound)
             {
                 using (new AppCenterGuiFieldHelper.UnityHorizontal(AppCenterEditorHelper.uiStyle.GetStyle("gpStyleClear")))
                 {
@@ -390,13 +384,34 @@ namespace AppCenterEditor
             {
                 return true;
             }
+            bool isOutdated = false;
 
-            string[] current = InstalledSdkVersion.Split('.');
-            string[] latest = LatestSdkVersion.Split('.');
+            foreach (var package in AppCenterSDKPackage.SupportedPackages)
+            {
+                if (package.IsInstalled)
+                {
+                    string packageVersion = package.InstalledVersion;
+                    bool isPackageOutdated = false;
+                    if (string.IsNullOrEmpty(packageVersion) || packageVersion == Constants.UnknownVersion)
+                    {
+                        isPackageOutdated = true;
+                    }
+                    else
+                    {
+                        string[] current = packageVersion.Split('.');
+                        string[] latest = LatestSdkVersion.Split('.');
+                        isPackageOutdated = int.Parse(latest[0]) > int.Parse(current[0])
+                        || int.Parse(latest[1]) > int.Parse(current[1])
+                        || int.Parse(latest[2]) > int.Parse(current[2]);
+                    }
+                    if (isPackageOutdated)
+                    {
+                        isOutdated = true;
+                    }
+                }
+            }
 
-            return int.Parse(latest[0]) > int.Parse(current[0])
-                || int.Parse(latest[1]) > int.Parse(current[1])
-                || int.Parse(latest[2]) > int.Parse(current[2]);
+            return isOutdated;            
         }
 
         private static void UpgradeSdk()
