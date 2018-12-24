@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -211,7 +211,7 @@ namespace AppCenterEditor
             }
             if (string.IsNullOrEmpty(InstalledVersion))
             {
-                InstalledVersion = string.IsNullOrEmpty(coreVersion) ? Constants.UnknownVersion : coreVersion;
+                InstalledVersion = Constants.UnknownVersion;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 
 namespace AppCenterEditor
@@ -16,7 +16,7 @@ namespace AppCenterEditor
 
         public static void DrawMenu()
         {
-            if (AppCenterEditorSDKTools.IsInstalled && AppCenterEditorSDKTools.isSdkSupported)
+            if (AppCenterEditorSDKTools.IsInstalled)
                 _menuState = (MenuStates)AppCenterEditorPrefsSO.Instance.curMainMenuIdx;
 
             var sdksButtonStyle = AppCenterEditorHelper.uiStyle.GetStyle("textButton");
