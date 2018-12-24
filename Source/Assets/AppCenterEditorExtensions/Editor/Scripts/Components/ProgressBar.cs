@@ -39,7 +39,7 @@ namespace AppCenterEditor
 
         public static void Draw()
         {
-            float progressMaxWidth = AppCenterEditor.InnerContainerWidth;
+            var progressMaxWidth = AppCenterEditor.InnerContainerWidth;
 
             pbarBgStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarBg");
             if (currentProgressBarState == ProgressBarStates.off)

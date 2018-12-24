@@ -128,6 +128,7 @@ namespace AppCenterEditor
         {
             GUI.skin = AppCenterEditorHelper.uiStyle;
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(window.position.width), GUILayout.Height(window.position.height));
+            // Gets a rectangle with size of inner scroll area.
             scrollInnerContainer = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
             using (
                 new AppCenterGuiFieldHelper.UnityVertical(
