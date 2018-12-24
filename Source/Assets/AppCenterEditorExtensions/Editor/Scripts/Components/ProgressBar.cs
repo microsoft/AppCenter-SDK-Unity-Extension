@@ -39,6 +39,8 @@ namespace AppCenterEditor
 
         public static void Draw()
         {
+            var progressMaxWidth = AppCenterEditor.InnerContainerWidth;
+
             pbarBgStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarBg");
             if (currentProgressBarState == ProgressBarStates.off)
             {
@@ -48,7 +50,7 @@ namespace AppCenterEditor
                 lastUpdateTime = 0;
                 isReveresed = false;
 
-                progressWidth = EditorGUIUtility.currentViewWidth;
+                progressWidth = progressMaxWidth;
                 pbarStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarClear");
                 pbarBgStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarClear");
                 //return;
@@ -62,7 +64,7 @@ namespace AppCenterEditor
             {
                 if ((float)EditorApplication.timeSinceStartup - stTime < animationSpeed)
                 {
-                    progressWidth = EditorGUIUtility.currentViewWidth;
+                    progressWidth = progressMaxWidth;
                     pbarStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarSuccess");
                 }
                 else if (AppCenterEditor.blockingRequests.Count > 0)
@@ -78,7 +80,7 @@ namespace AppCenterEditor
             {
                 if ((float)EditorApplication.timeSinceStartup - stTime < animationSpeed)
                 {
-                    progressWidth = EditorGUIUtility.currentViewWidth;
+                    progressWidth = progressMaxWidth;
                     pbarStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarWarn");
                 }
                 else if (AppCenterEditor.blockingRequests.Count > 0)
@@ -94,7 +96,7 @@ namespace AppCenterEditor
             {
                 if ((float)EditorApplication.timeSinceStartup - stTime < animationSpeed)
                 {
-                    progressWidth = EditorGUIUtility.currentViewWidth;
+                    progressWidth = progressMaxWidth;
                     pbarStyle = AppCenterEditorHelper.uiStyle.GetStyle("progressBarError");
                 }
                 else if (AppCenterEditor.blockingRequests.Count > 0)
@@ -116,7 +118,7 @@ namespace AppCenterEditor
 
                     if (currentProgressBarState == ProgressBarStates.on)
                     {
-                        progressWidth = EditorGUIUtility.currentViewWidth * progress;
+                        progressWidth = progressMaxWidth * progress;
                     }
                     else if (currentProgressBarState == ProgressBarStates.spin)
                     {
@@ -124,12 +126,12 @@ namespace AppCenterEditor
                         if (currentTime < endTime && !isReveresed)
                         {
                             UpdateProgress((currentTime - stTime) / animationSpeed);
-                            progressWidth = EditorGUIUtility.currentViewWidth * progress;
+                            progressWidth = progressMaxWidth * progress;
                         }
                         else if (currentTime < endTime && isReveresed)
                         {
                             UpdateProgress((currentTime - stTime) / animationSpeed);
-                            progressWidth = EditorGUIUtility.currentViewWidth - EditorGUIUtility.currentViewWidth * progress;
+                            progressWidth = progressMaxWidth - progressMaxWidth * progress;
                         }
                         else
                         {
