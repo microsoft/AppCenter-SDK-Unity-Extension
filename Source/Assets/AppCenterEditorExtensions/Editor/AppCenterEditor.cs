@@ -26,12 +26,7 @@ namespace AppCenterEditor
         {
             get
             {
-                if (scrollInnerContainer != null)
-                {
-                    return scrollInnerContainer.width;
-                }
-
-                return EditorGUIUtility.currentViewWidth;
+                return scrollInnerContainer.width;
             }
         }
 
