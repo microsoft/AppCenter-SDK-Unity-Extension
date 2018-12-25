@@ -411,16 +411,23 @@ namespace AppCenterEditor
                 }
             }
 
-            return isOutdated;            
+            return isOutdated;
         }
 
         private static void UpgradeSdk()
         {
             if (EditorUtility.DisplayDialog("Confirm SDK Upgrade", "This action will remove the current App Center SDK and install the lastet version.", "Confirm", "Cancel"))
             {
-                IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
-                RemoveSdkBeforeUpdate();
-                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
+                try
+                {
+                    var installedPackages = AppCenterSDKPackage.GetInstalledPackages();
+                    RemoveSdkBeforeUpdate();
+                    PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
+                }
+                catch (Exception exception)
+                {
+                    EdExLogger.LoggerInstance.LogError("Failed to upgrade SDK: " + exception);
+                }
             }
         }
 
