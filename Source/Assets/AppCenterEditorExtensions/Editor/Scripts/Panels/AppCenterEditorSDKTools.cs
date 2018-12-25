@@ -305,7 +305,15 @@ namespace AppCenterEditor
                 if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                 {
                     IsInstalling = true;
-                    PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion);
+                    try
+                    {
+                        PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion);
+                    }
+                    catch (Exception exception)
+                    {
+                        EdExLogger.LoggerInstance.LogError("Failed to install SDK packages: " + exception);
+                        IsInstalling = false;
+                    }
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -427,6 +435,7 @@ namespace AppCenterEditor
                 catch (Exception exception)
                 {
                     EdExLogger.LoggerInstance.LogError("Failed to upgrade SDK: " + exception);
+                    IsUpgrading = false;
                 }
             }
         }
