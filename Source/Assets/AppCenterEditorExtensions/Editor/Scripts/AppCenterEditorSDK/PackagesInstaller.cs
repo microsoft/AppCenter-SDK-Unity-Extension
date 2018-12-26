@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace AppCenterEditor
@@ -28,6 +29,10 @@ namespace AppCenterEditor
                         AppCenterEditorPrefsSO.Instance.SdkPath = string.IsNullOrEmpty(existingSdkPath) ? AppCenterEditorHelper.DEFAULT_SDK_LOCATION : existingSdkPath;
                         //AppCenterEditorDataService.SaveEnvDetails();
                         EdExLogger.LoggerInstance.LogWithTimeStamp("App Center SDK install complete");
+                    }
+                    catch (Exception exception)
+                    {
+                        EdExLogger.LoggerInstance.LogError("Failed to import packages: " + exception);
                     }
                     finally
                     {

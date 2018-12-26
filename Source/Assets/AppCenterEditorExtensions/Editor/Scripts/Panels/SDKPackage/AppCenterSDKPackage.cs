@@ -177,8 +177,7 @@ namespace AppCenterEditor
                     {
                         if (GUILayout.Button("Install SDK", AppCenterEditorHelper.uiStyle.GetStyle("textButton")))
                         {
-                            AppCenterEditorSDKTools.IsInstalling = true;
-                            IsPackageInstalling = true;
+                            AppCenterEditorSDKTools.IsInstalling = IsPackageInstalling = true;
                             ImportLatestPackageSDK();
                         }
                     }
@@ -217,7 +216,15 @@ namespace AppCenterEditor
 
         private void ImportLatestPackageSDK()
         {
-            PackagesInstaller.ImportLatestSDK(new[] { this }, AppCenterEditorSDKTools.LatestSdkVersion);
+            try
+            {
+                PackagesInstaller.ImportLatestSDK(new[] { this }, AppCenterEditorSDKTools.LatestSdkVersion);
+            }
+            catch (Exception exception)
+            {
+                EdExLogger.LoggerInstance.LogError("Failed to import package: " + exception);
+                AppCenterEditorSDKTools.IsInstalling = IsPackageInstalling = false;
+            }
         }
     }
 }

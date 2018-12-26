@@ -305,7 +305,15 @@ namespace AppCenterEditor
                 if (GUILayout.Button("Install all App Center SDK packages", AppCenterEditorHelper.uiStyle.GetStyle("Button"), GUILayout.MaxWidth(buttonWidth), GUILayout.MinHeight(32)))
                 {
                     IsInstalling = true;
-                    PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion);
+                    try
+                    {
+                        PackagesInstaller.ImportLatestSDK(GetNotInstalledPackages(), LatestSdkVersion);
+                    }
+                    catch (Exception exception)
+                    {
+                        EdExLogger.LoggerInstance.LogError("Failed to install SDK packages: " + exception);
+                        IsInstalling = false;
+                    }
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -411,16 +419,24 @@ namespace AppCenterEditor
                 }
             }
 
-            return isOutdated;            
+            return isOutdated;
         }
 
         private static void UpgradeSdk()
         {
             if (EditorUtility.DisplayDialog("Confirm SDK Upgrade", "This action will remove the current App Center SDK and install the lastet version.", "Confirm", "Cancel"))
             {
-                IEnumerable<AppCenterSDKPackage> installedPackages = AppCenterSDKPackage.GetInstalledPackages();
-                RemoveSdkBeforeUpdate();
-                PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
+                try
+                {
+                    var installedPackages = AppCenterSDKPackage.GetInstalledPackages();
+                    RemoveSdkBeforeUpdate();
+                    PackagesInstaller.ImportLatestSDK(installedPackages, LatestSdkVersion, AppCenterEditorPrefsSO.Instance.SdkPath);
+                }
+                catch (Exception exception)
+                {
+                    EdExLogger.LoggerInstance.LogError("Failed to upgrade SDK: " + exception);
+                    IsUpgrading = false;
+                }
             }
         }
 
