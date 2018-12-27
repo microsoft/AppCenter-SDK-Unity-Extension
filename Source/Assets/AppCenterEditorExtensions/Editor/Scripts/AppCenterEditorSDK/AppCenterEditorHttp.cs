@@ -16,10 +16,10 @@ namespace AppCenterEditor
             EdExLogger.LoggerInstance.LogWithTimeStamp("Downloading file: " + url);
             var www = UnityWebRequest.Get(url);
             AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnHttpReq, url, AppCenterEditorHelper.MSG_SPIN_BLOCK);
-            EditorCoroutine.Start(PostDownload(www, response =>
+            Coroutiner.StartCoroutine(PostDownload(www, response =>
             {
                 resultCallback(WriteResultFile(url, response));
-            }, AppCenterEditorHelper.SharedErrorCallback), www);
+            }, AppCenterEditorHelper.SharedErrorCallback));
         }
 
         internal static void MakeDownloadCall(IEnumerable<string> urls, Action<IEnumerable<string>> resultCallback)
@@ -34,13 +34,13 @@ namespace AppCenterEditor
                 downloadRequests.Add(new DownloadRequest(url, www));
             }
             AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnHttpReq, "Downloading files", AppCenterEditorHelper.MSG_SPIN_BLOCK);
-            EditorCoroutine.Start(DownloadFiles(downloadRequests, resultCallback, AppCenterEditorHelper.SharedErrorCallback), wwws);
+            Coroutiner.StartCoroutine(DownloadFiles(downloadRequests, resultCallback, AppCenterEditorHelper.SharedErrorCallback));
         }
 
         internal static void MakeGitHubApiCall(string url, Action<string> resultCallback)
         {
             var www = UnityWebRequest.Get(url);
-            EditorCoroutine.Start(Post(www, response => { OnGitHubSuccess(resultCallback, response); }, AppCenterEditorHelper.SharedErrorCallback), www);
+            Coroutiner.StartCoroutine(Post(www, response => { OnGitHubSuccess(resultCallback, response); }, AppCenterEditorHelper.SharedErrorCallback));
         }
 
         private static IEnumerator Post(UnityWebRequest www, Action<string> callBack, Action<string> errorCallback)
@@ -75,7 +75,8 @@ namespace AppCenterEditor
             foreach (var downloadRequest in downloadRequests)
             {
                 yield return downloadRequest.WWW.SendWebRequest();
-                if (string.IsNullOrEmpty(downloadRequest.WWW.error))
+
+                if (!downloadRequest.WWW.isHttpError && !downloadRequest.WWW.isNetworkError)
                 {
                     var downloadedFile = WriteResultFile(downloadRequest.Url, downloadRequest.WWW.downloadHandler.data);
                     downloadedFiles.Add(downloadedFile);
