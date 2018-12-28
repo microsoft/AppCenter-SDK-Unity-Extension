@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace AppCenterEditor
 {
@@ -13,58 +14,58 @@ namespace AppCenterEditor
         internal static void MakeDownloadCall(string url, Action<string> resultCallback)
         {
             EdExLogger.LoggerInstance.LogWithTimeStamp("Downloading file: " + url);
-            var www = new WWW(url);
+            var www = UnityWebRequest.Get(url);
             AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnHttpReq, url, AppCenterEditorHelper.MSG_SPIN_BLOCK);
-            EditorCoroutine.Start(PostDownload(www, response =>
+            Coroutiner.StartCoroutine(PostDownload(www, response =>
             {
                 resultCallback(WriteResultFile(url, response));
-            }, AppCenterEditorHelper.SharedErrorCallback), www);
+            }, AppCenterEditorHelper.SharedErrorCallback));
         }
 
         internal static void MakeDownloadCall(IEnumerable<string> urls, Action<IEnumerable<string>> resultCallback)
         {
             EdExLogger.LoggerInstance.LogWithTimeStamp("Downloading files: " + string.Join(", ", urls.ToArray()));
-            var wwws = new List<WWW>();
+            var wwws = new List<UnityWebRequest>();
             var downloadRequests = new List<DownloadRequest>();
             foreach (var url in urls)
             {
-                var www = new WWW(url);
+                var www = UnityWebRequest.Get(url);
                 wwws.Add(www);
                 downloadRequests.Add(new DownloadRequest(url, www));
             }
             AppCenterEditor.RaiseStateUpdate(AppCenterEditor.EdExStates.OnHttpReq, "Downloading files", AppCenterEditorHelper.MSG_SPIN_BLOCK);
-            EditorCoroutine.Start(DownloadFiles(downloadRequests, resultCallback, AppCenterEditorHelper.SharedErrorCallback), wwws);
+            Coroutiner.StartCoroutine(DownloadFiles(downloadRequests, resultCallback, AppCenterEditorHelper.SharedErrorCallback));
         }
 
         internal static void MakeGitHubApiCall(string url, Action<string> resultCallback)
         {
-            var www = new WWW(url);
-            EditorCoroutine.Start(Post(www, response => { OnGitHubSuccess(resultCallback, response); }, AppCenterEditorHelper.SharedErrorCallback), www);
+            var www = UnityWebRequest.Get(url);
+            Coroutiner.StartCoroutine(Post(www, response => { OnGitHubSuccess(resultCallback, response); }, AppCenterEditorHelper.SharedErrorCallback));
         }
 
-        private static IEnumerator Post(WWW www, Action<string> callBack, Action<string> errorCallback)
+        private static IEnumerator Post(UnityWebRequest www, Action<string> callBack, Action<string> errorCallback)
         {
-            yield return www;
+            yield return www.SendWebRequest();
             if (!string.IsNullOrEmpty(www.error))
             {
                 errorCallback(www.error);
             }
             else
             {
-                callBack(www.text);
+                callBack(www.downloadHandler.text);
             }
         }
 
-        private static IEnumerator PostDownload(WWW www, Action<byte[]> callBack, Action<string> errorCallback)
+        private static IEnumerator PostDownload(UnityWebRequest www, Action<byte[]> callBack, Action<string> errorCallback)
         {
-            yield return www;
+            yield return www.SendWebRequest();
             if (!string.IsNullOrEmpty(www.error))
             {
                 errorCallback(www.error);
             }
             else
             {
-                callBack(www.bytes);
+                callBack(www.downloadHandler.data);
             }
         }
 
@@ -73,10 +74,11 @@ namespace AppCenterEditor
             var downloadedFiles = new List<string>();
             foreach (var downloadRequest in downloadRequests)
             {
-                yield return downloadRequest.WWW;
-                if (string.IsNullOrEmpty(downloadRequest.WWW.error))
+                yield return downloadRequest.WWW.SendWebRequest();
+
+                if (!downloadRequest.WWW.isHttpError && !downloadRequest.WWW.isNetworkError)
                 {
-                    var downloadedFile = WriteResultFile(downloadRequest.Url, downloadRequest.WWW.bytes);
+                    var downloadedFile = WriteResultFile(downloadRequest.Url, downloadRequest.WWW.downloadHandler.data);
                     downloadedFiles.Add(downloadedFile);
                 }
                 else
@@ -152,9 +154,9 @@ namespace AppCenterEditor
         private class DownloadRequest
         {
             public string Url { get; private set; }
-            public WWW WWW { get; private set; }
+            public UnityWebRequest WWW { get; private set; }
 
-            public DownloadRequest(string url, WWW www)
+            public DownloadRequest(string url, UnityWebRequest www)
             {
                 Url = url;
                 WWW = www;

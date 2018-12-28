@@ -86,7 +86,7 @@ namespace AppCenterEditor
             {
                 if (AppCenterEditorPrefsSO.Instance.PanelIsShown || !AppCenterEditorSDKTools.IsInstalled)
                 {
-                    EditorCoroutine.Start(OpenAppCenterServices());
+                    Coroutiner.StartCoroutine(OpenAppCenterServices());
                 }
             }
         }
