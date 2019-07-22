@@ -35,8 +35,12 @@ namespace AppCenterEditor
                         EdExLogger.LoggerInstance.LogError("Failed to import packages: " + exception);
                     }
                     finally
-                    {
-                        AppCenterEditorSDKTools.IsInstalling = false;
+					{
+						foreach (var package in packagesToImport)
+						{
+							package.IsInstalled = true;
+						}
+						AppCenterEditorSDKTools.IsInstalling = false;
                     }
                 });
             }
