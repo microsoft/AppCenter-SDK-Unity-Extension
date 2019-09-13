@@ -128,6 +128,10 @@ namespace AppCenterEditor
             {
                 fileName = AppCenterEditorHelper.ANALYTICS_SDK_DOWNLOAD_PATH;
             }
+            else if (url.IndexOf("AppCenterAuth-v") > -1)
+            {
+                fileName = AppCenterEditorHelper.AUTH_SDK_DOWNLOAD_PATH;
+            }
             else if (url.IndexOf("AppCenterCrashes-v") > -1)
             {
                 fileName = AppCenterEditorHelper.CRASHES_SDK_DOWNLOAD_PATH;

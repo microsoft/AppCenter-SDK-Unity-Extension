@@ -1,4 +1,3 @@
-# Release 1.1.2
+## Release 1.1.3
 
-* **[Bug fix]** Fixed UI controls positioning and scrollbar behavior
-* **[Bug fix]** Fixed package update logic for some of the old App Center Unity SDK package versions
+* **[Feature]** App Center Unity SDK Auth package support
