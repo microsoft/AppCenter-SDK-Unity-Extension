@@ -1,5 +1,9 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
+## Release 1.2.0
+
+* **[Feature]** App Center Unity SDK Auth package support
+
 ## Release 1.1.2
 
 * **[Bug fix]** Fixed UI controls positioning and scrollbar behavior
