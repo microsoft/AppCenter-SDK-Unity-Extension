@@ -1,5 +1,11 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
+## Development version
+
+* **[Bug fix]** Fix call to github on every time when editor enters play mode. 
+
+___
+
 ## Release 1.2.0
 
 * **[Feature]** App Center Unity SDK Auth package support
