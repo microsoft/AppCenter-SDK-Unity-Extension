@@ -12,35 +12,61 @@ namespace AppCenterEditor
 #endif
     public class AppCenterEditorPrefsSO : ScriptableObject
     {
-        public const string InstanceKey = "AppCenterEditorPrefsSOKey";
+        public const string EdxLastCheckDateKey = "EdxLastCheckDateKey";
+        public const string SdkLastCheckDateKey = "SdkLastCheckDateKey";
         public string SdkPath;
         public string EdExPath;
         public bool PanelIsShown;
         public int curMainMenuIdx;
-        [SerializeField]
         private string _latestSdkVersion;
-        [SerializeField]
         private string _latestEdExVersion;
-        [SerializeField]
-        private string _latestEdExVersionCheckDateString;
-        [SerializeField]
-        private string _lastSdkVersionCheckDateString;
         private DateTime _lastSdkVersionCheck;
         private DateTime _lastEdExVersionCheck;
         private static AppCenterEditorPrefsSO _instance;
 
         public string EdSet_latestSdkVersion
         {
-            get { return _latestSdkVersion; }
-            set { _latestSdkVersion = value; _lastSdkVersionCheck = DateTime.UtcNow; _lastSdkVersionCheckDateString = _lastSdkVersionCheck.ToString(CultureInfo.InvariantCulture); }
+            get 
+            { 
+                return _latestSdkVersion;
+            }
+            set 
+            {
+                _latestSdkVersion = value;
+                _lastSdkVersionCheck = DateTime.UtcNow;
+                PlayerPrefs.SetString(SdkLastCheckDateKey, _lastSdkVersionCheck.ToString(CultureInfo.InvariantCulture));
+            }
         }
+
         public string EdSet_latestEdExVersion
         {
-            get { return _latestEdExVersion; }
-            set { _latestEdExVersion = value; _lastEdExVersionCheck = DateTime.UtcNow; _latestEdExVersionCheckDateString = _lastEdExVersionCheck.ToString(CultureInfo.InvariantCulture); }
+            get 
+            {
+                return _latestEdExVersion;
+            }
+            set
+            {
+                _latestEdExVersion = value;
+                _lastEdExVersionCheck = DateTime.UtcNow;
+                PlayerPrefs.SetString(EdxLastCheckDateKey, _lastEdExVersionCheck.ToString(CultureInfo.InvariantCulture));
+            }
         }
-        public DateTime EdSet_lastSdkVersionCheck { get { return string.IsNullOrEmpty(_lastSdkVersionCheckDateString) ? _lastSdkVersionCheck : DateTime.Parse(_lastSdkVersionCheckDateString); } }
-        public DateTime EdSet_lastEdExVersionCheck { get { return string.IsNullOrEmpty(_latestEdExVersionCheckDateString) ? _lastEdExVersionCheck : DateTime.Parse(_latestEdExVersionCheckDateString); } }
+
+        public DateTime EdSet_lastSdkVersionCheck 
+        {
+            get
+            {
+                return PlayerPrefs.HasKey(SdkLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(SdkLastCheckDateKey)) : _lastSdkVersionCheck;
+            }
+        }
+
+        public DateTime EdSet_lastEdExVersionCheck
+        {
+            get
+            {
+                return PlayerPrefs.HasKey(EdxLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(EdxLastCheckDateKey)) : _lastEdExVersionCheck;
+            }
+        }
 
         public static AppCenterEditorPrefsSO Instance
         {
@@ -53,13 +79,7 @@ namespace AppCenterEditor
                 if (settingsList.Length == 1)
                     _instance = settingsList[0];
                 if (_instance != null)
-                {
-                    if (PlayerPrefs.HasKey(InstanceKey))
-                    {
-                        JsonUtility.FromJsonOverwrite(PlayerPrefs.GetString(InstanceKey), _instance);
-                    }
                     return _instance;
-                }
                 _instance = CreateInstance<AppCenterEditorPrefsSO>();
                 if (!Directory.Exists(Path.Combine(Application.dataPath, "AppCenterEditorExtensions/Editor/Resources")))
                     Directory.CreateDirectory(Path.Combine(Application.dataPath, "AppCenterEditorExtensions/Editor/Resources"));

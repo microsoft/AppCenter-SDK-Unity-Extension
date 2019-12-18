@@ -302,7 +302,6 @@ namespace AppCenterEditor
                 {
                     latestEdExVersion = version ?? Constants.UnknownVersion;
                     AppCenterEditorPrefsSO.Instance.EdSet_latestEdExVersion = latestEdExVersion;
-                    PlayerPrefs.SetString(AppCenterEditorPrefsSO.InstanceKey, JsonUtility.ToJson(AppCenterEditorPrefsSO.Instance));
                 });
             }
             else
@@ -348,7 +347,8 @@ namespace AppCenterEditor
                 {
                     AssetDatabase.Refresh();
                 }
-                PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.InstanceKey);
+                PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.SdkLastCheckDateKey);
+                PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.EdxLastCheckDateKey);
             }
             catch (Exception ex)
             {

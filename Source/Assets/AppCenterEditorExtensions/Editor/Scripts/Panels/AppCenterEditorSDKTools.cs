@@ -567,7 +567,6 @@ namespace AppCenterEditor
                 {
                     LatestSdkVersion = version ?? Constants.UnknownVersion;
                     AppCenterEditorPrefsSO.Instance.EdSet_latestSdkVersion = LatestSdkVersion;
-                    PlayerPrefs.SetString(AppCenterEditorPrefsSO.InstanceKey, JsonUtility.ToJson(AppCenterEditorPrefsSO.Instance));
                 });
             }
             else
