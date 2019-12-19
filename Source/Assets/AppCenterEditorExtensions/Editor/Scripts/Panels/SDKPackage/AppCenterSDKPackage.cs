@@ -13,7 +13,6 @@ namespace AppCenterEditor
         public static IEnumerable<AppCenterSDKPackage> SupportedPackages = new AppCenterSDKPackage[]
         {
             AppCenterAnalyticsPackage.Instance,
-            AppCenterAuthPackage.Instance,
             AppCenterCrashesPackage.Instance,
             AppCenterDistributePackage.Instance,
             AppCenterPushPackage.Instance

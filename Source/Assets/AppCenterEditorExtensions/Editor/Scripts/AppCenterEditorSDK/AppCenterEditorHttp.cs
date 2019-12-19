@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace AppCenterEditor
@@ -127,10 +126,6 @@ namespace AppCenterEditor
             else if (url.IndexOf("AppCenterAnalytics-v") > -1)
             {
                 fileName = AppCenterEditorHelper.ANALYTICS_SDK_DOWNLOAD_PATH;
-            }
-            else if (url.IndexOf("AppCenterAuth-v") > -1)
-            {
-                fileName = AppCenterEditorHelper.AUTH_SDK_DOWNLOAD_PATH;
             }
             else if (url.IndexOf("AppCenterCrashes-v") > -1)
             {
