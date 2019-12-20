@@ -2,7 +2,7 @@
 
 ## Development version
 
-* **[Feature]** App Center Unity SDK Auth package removed. 
+* **[Breaking Change]** App Center Unity SDK Auth package removed. 
 
 ___
 
