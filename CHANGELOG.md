@@ -2,7 +2,7 @@
 
 ## Development version
 
-* **[Bug fix]** Fix call to github on every time when editor enters play mode. 
+* **[Bug fix]** Fixed excess GitHub API calls from unity extension
 
 ___
 
