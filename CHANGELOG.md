@@ -2,7 +2,7 @@
 
 ## Development version
 
-* **[Bug fix]** Fixed excess GitHub API calls from unity extension
+* **[Bug fix]** Fixed excessive amount of GitHub API calls from unity extension.
 
 ___
 
