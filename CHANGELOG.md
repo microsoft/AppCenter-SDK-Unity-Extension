@@ -1,5 +1,11 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
+## Development version
+
+* **[Bug fix]** Fixed excessive amount of GitHub API calls.
+
+___
+
 ## Release 1.2.0
 
 * **[Feature]** App Center Unity SDK Auth package support
