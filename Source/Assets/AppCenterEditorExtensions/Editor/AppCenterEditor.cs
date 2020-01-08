@@ -348,7 +348,7 @@ namespace AppCenterEditor
                     AssetDatabase.Refresh();
                 }
                 PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.SdkLastCheckDateKey);
-                PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.EdxLastCheckDateKey);
+                PlayerPrefs.DeleteKey(AppCenterEditorPrefsSO.EdExLastCheckDateKey);
             }
             catch (Exception ex)
             {

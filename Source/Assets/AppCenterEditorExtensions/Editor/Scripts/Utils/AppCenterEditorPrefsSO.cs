@@ -12,7 +12,7 @@ namespace AppCenterEditor
 #endif
     public class AppCenterEditorPrefsSO : ScriptableObject
     {
-        public const string EdxLastCheckDateKey = "EdxLastCheckDateKey";
+        public const string EdExLastCheckDateKey = "EdExLastCheckDateKey";
         public const string SdkLastCheckDateKey = "SdkLastCheckDateKey";
         public string SdkPath;
         public string EdExPath;
@@ -48,7 +48,7 @@ namespace AppCenterEditor
             {
                 _latestEdExVersion = value;
                 _lastEdExVersionCheck = DateTime.UtcNow;
-                PlayerPrefs.SetString(EdxLastCheckDateKey, _lastEdExVersionCheck.ToString(CultureInfo.InvariantCulture));
+                PlayerPrefs.SetString(EdExLastCheckDateKey, _lastEdExVersionCheck.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -64,7 +64,7 @@ namespace AppCenterEditor
         {
             get
             {
-                return PlayerPrefs.HasKey(EdxLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(EdxLastCheckDateKey)) : _lastEdExVersionCheck;
+                return PlayerPrefs.HasKey(EdExLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(EdExLastCheckDateKey)) : _lastEdExVersionCheck;
             }
         }
 
