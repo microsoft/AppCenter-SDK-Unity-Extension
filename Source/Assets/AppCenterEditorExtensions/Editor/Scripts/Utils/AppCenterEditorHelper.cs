@@ -1,7 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace AppCenterEditor
@@ -17,7 +15,6 @@ namespace AppCenterEditor
         public static string DEFAULT_SDK_LOCATION_PATH = Application.dataPath + "/AppCenter";
         public static string MSG_SPIN_BLOCK = "{\"useSpinner\":true, \"blockUi\":true }";
         public static string ANALYTICS_SDK_DOWNLOAD_PATH = "/Resources/AppCenterAnalyticsUnitySdk.unitypackage";
-        public static string AUTH_SDK_DOWNLOAD_PATH = "/Resources/AppCenterAuthUnitySdk.unitypackage";
         public static string CRASHES_SDK_DOWNLOAD_PATH = "/Resources/AppCenterCrashesUnitySdk.unitypackage";
         public static string DISTRIBUTE_SDK_DOWNLOAD_PATH = "/Resources/AppCenterDistributeUnitySdk.unitypackage";
         public static string EDEX_UPGRADE_PATH = "/Resources/AppCenterUnityEditorExtensions.unitypackage";
