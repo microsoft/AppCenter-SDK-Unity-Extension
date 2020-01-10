@@ -1,8 +1,8 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
-## Development version
+## Development version (1.3.0)
 
-* **[Breaking Change]** App Center Unity SDK Auth package removed. 
+* **[Breaking Change]** App Center Auth has retired and been removed from the SDK. Removed Auth package support.
 
 ___
 
