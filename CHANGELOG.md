@@ -2,7 +2,7 @@
 
 ## Development version (1.3.0)
 
-* **[Breaking Change]** App Center Auth has retired and been removed from the SDK. Removed Auth package support.
+* **[Breaking Change]** App Center Auth is [retired](https://aka.ms/MBaaS-retirement-blog-post) and has been removed from the SDK. Removed Auth package support.
 
 ___
 
