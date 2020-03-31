@@ -17,7 +17,7 @@ Task("GitRelease")
 
     var username = "user";
     var password = Argument<string>("GithubToken");
-    var owner = "Microsoft";
+    var owner = "microsoft";
     var repo = "AppCenter-SDK-Unity-Extension";
 
     // Build a string containing paths to NuGet packages
