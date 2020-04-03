@@ -16,7 +16,6 @@ namespace AppCenterEditor
         public static string DEFAULT_SDK_LOCATION_PATH = Application.dataPath + "/AppCenter";
         public static string MSG_SPIN_BLOCK = "{\"useSpinner\":true, \"blockUi\":true }";
         public static string ANALYTICS_SDK_DOWNLOAD_PATH = "/Resources/AppCenterAnalyticsUnitySdk.unitypackage";
-        public static string AUTH_SDK_DOWNLOAD_PATH = "/Resources/AppCenterAuthUnitySdk.unitypackage";
         public static string CRASHES_SDK_DOWNLOAD_PATH = "/Resources/AppCenterCrashesUnitySdk.unitypackage";
         public static string DISTRIBUTE_SDK_DOWNLOAD_PATH = "/Resources/AppCenterDistributeUnitySdk.unitypackage";
         public static string EDEX_UPGRADE_PATH = "/Resources/AppCenterUnityEditorExtensions.unitypackage";
@@ -71,13 +70,13 @@ namespace AppCenterEditor
         
         private static string FindEdexRoot()
         {
-            var fileList = Directory.GetDirectories(Application.dataPath, "*" + EDEX_NAME, SearchOption.AllDirectories);
-            if (fileList.Length == 0)
+            var directoryList = Directory.GetDirectories(Application.dataPath, "*" + EDEX_NAME, SearchOption.AllDirectories);
+            if (directoryList.Length == 0)
             {
-                throw new FileNotFoundException(EDEX_NAME + " not found");
+                throw new DirectoryNotFoundException(EDEX_NAME + " not found");
             }
 
-            var relativePath = fileList[0].Substring(fileList[0].LastIndexOf("Assets" + Path.DirectorySeparatorChar, StringComparison.Ordinal));
+            var relativePath = directoryList[0].Substring(directoryList[0].LastIndexOf("Assets" + Path.DirectorySeparatorChar, StringComparison.Ordinal));
             return Path.Combine(relativePath, "Editor");
         }
     }
