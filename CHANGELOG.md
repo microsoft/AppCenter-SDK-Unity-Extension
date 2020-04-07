@@ -1,6 +1,6 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
-## Release 2.1.0 (in development)
+## Release 2.0.1 (in development)
 
 * **[Improvement]** Detect `AppCenterEditorExtensions` location automatically.
 
