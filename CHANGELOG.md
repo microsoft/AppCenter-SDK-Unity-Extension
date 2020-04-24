@@ -2,6 +2,7 @@
 
 ## Release 2.0.1 (in development)
 
+* **[Fix]** Fix version check date time value parsing. 
 * **[Improvement]** Detect `AppCenterEditorExtensions` location automatically.
 
 ## Release 2.0.0

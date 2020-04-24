@@ -56,7 +56,7 @@ namespace AppCenterEditor
         {
             get
             {
-                return PlayerPrefs.HasKey(SdkLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(SdkLastCheckDateKey)) : _lastSdkVersionCheck;
+                return PlayerPrefs.HasKey(SdkLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(SdkLastCheckDateKey), CultureInfo.InvariantCulture) : _lastSdkVersionCheck;
             }
         }
 
@@ -64,7 +64,7 @@ namespace AppCenterEditor
         {
             get
             {
-                return PlayerPrefs.HasKey(EdExLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(EdExLastCheckDateKey)) : _lastEdExVersionCheck;
+                return PlayerPrefs.HasKey(EdExLastCheckDateKey) ? DateTime.Parse(PlayerPrefs.GetString(EdExLastCheckDateKey), CultureInfo.InvariantCulture) : _lastEdExVersionCheck;
             }
         }
 
