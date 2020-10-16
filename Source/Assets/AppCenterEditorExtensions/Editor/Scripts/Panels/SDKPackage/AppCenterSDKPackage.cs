@@ -15,7 +15,6 @@ namespace AppCenterEditor
             AppCenterAnalyticsPackage.Instance,
             AppCenterCrashesPackage.Instance,
             AppCenterDistributePackage.Instance,
-            AppCenterPushPackage.Instance
         };
 
         public string InstalledVersion { get; private set; }
