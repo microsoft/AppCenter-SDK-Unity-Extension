@@ -1,6 +1,6 @@
 # App Center SDK for Unity Editor Extensions Change Log
 
-## Release 2.0.1 (in development)
+## Release 3.0.0
 
 * **[Fix]** Fix version check date time value parsing. 
 * **[Improvement]** Detect `AppCenterEditorExtensions` location automatically.
