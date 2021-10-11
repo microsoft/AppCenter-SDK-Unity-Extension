@@ -75,7 +75,12 @@ namespace AppCenterEditor
             {
                 yield return downloadRequest.WWW.SendWebRequest();
 
+#if UNITY_2020_2_OR_NEWER
+                if (downloadRequest.WWW.result != UnityWebRequest.Result.ProtocolError
+                    && downloadRequest.WWW.result != UnityWebRequest.Result.ConnectionError)
+#else
                 if (!downloadRequest.WWW.isHttpError && !downloadRequest.WWW.isNetworkError)
+#endif
                 {
                     var downloadedFile = WriteResultFile(downloadRequest.Url, downloadRequest.WWW.downloadHandler.data);
                     downloadedFiles.Add(downloadedFile);
